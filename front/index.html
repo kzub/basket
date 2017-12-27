@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+	<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+
+	<link rel="stylesheet" href="styles.css">
+
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+	<title>Basketball</title>
+</head>
+<body>
+
+	<div class="card" id="mainscreen">
+		<h4 class="p-3 mb-2 bg-dark text-white"><center>Записаться на игру</center></h4>
+		<div class="card-body">
+			<h4 class="card-title">м. Дмитровская</h4>
+
+			
+			<h6 class="card-subtitle mb-2 text-muted">Фитнес-клуб Манхэттен 
+				<a id="button-address" href="#">(схема проезда)</a>
+			</h6>
+			
+			<div id="main">
+				<div id="dateAccordion" data-children=".item">
+					<div class="item">
+						<div class="card card-header">
+							<a id="players-head" data-toggle="collapse" data-parent="#dateAccordion" href="#players">
+								<h4 id="gameDate">Загружается...</h4>
+								<span id="gameTime"></span>
+							</a>
+						</div>
+						<div id="players" class="collapse">
+							<div id="players-list" class="card-body">
+								<h5 id="noSlotsMessage" class="card-title">Свободных мест нет</h5>
+								<a href="#" slot="0" class="btn-player btn disabled">-</a>
+								<a href="#" slot="1" class="btn-player btn disabled">-</a>
+								<a href="#" slot="2" class="btn-player btn disabled">-</a>
+								<a href="#" slot="3" class="btn-player btn disabled">-</a>
+								<a href="#" slot="4" class="btn-player btn disabled">-</a>
+								<a href="#" slot="5" class="btn-player btn disabled">-</a>
+								<a href="#" slot="6" class="btn-player btn disabled">-</a>
+								<a href="#" slot="7" class="btn-player btn disabled">-</a>
+								<a href="#" slot="8" class="btn-player btn disabled">-</a>
+								<a href="#" slot="9" class="btn-player btn disabled">-</a>
+							</div>
+						</div>
+					</div>
+
+					<div class="item">
+						<div class="card card-header">
+							<a id="pay-btn" data-toggle="collapse" data-parent="#dateAccordion">
+								<h4>Оплата</h4>
+							</a>
+						</div>
+						<div id="pay" class="collapse" role="tabpanel">
+							<div class="card-body">
+								<h4 class="card-title"><span id="pay-amount-title">-</span> рублей</h4>
+								<form id="submitform" method="POST" action="https://money.yandex.ru/quickpay/confirm.xml">
+									<div class="form-group">
+										<input type="text" class="form-control" id="custom-fio" aria-describedby="emailHelp" 
+										placeholder="Введите Фамилию и Имя" required>
+										<small id="emailHelp" class="form-text text-muted">Необходимо для прохода на площадку</small>
+									</div>
+									<input type="hidden" name="receiver" value="410015876343196">
+									<input type="hidden" name="quickpay-form" value="donate">
+									<input id="ordertarget" type="hidden" name="targets" value="Оплата баскетбольной площадки ">
+									<input type="hidden" name="paymentType" value="AC">
+									<input id="pay-amount-value" type="hidden" name="sum" value="0" data-type="number">
+									<input id="orderlabel" type="hidden" name="label" value="0">
+									<input id="successURL" type="hidden" name="successURL" value="">
+									<a id="paybutton" href="#" class="btn btn-primary">Оплатить</a>
+								</form>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<center><a href="https://t.me/joinchat/CE3oJA6vM82vZHQXf03yyA" class="btn btn-dark w-75 p-2 my-4" data-dismiss="modal">Обсуждение игры</a></center>
+
+	<div id="modal-window" class="modal" tabindex="-1" role="dialog">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 id="modal-title" class="modal-title">Title</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<p id="modal-text">text</p>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div id="modal-address" class="modal" tabindex="-1" role="dialog">
+		<div class="modal-dialog set-adress-size" role="document">
+			<div class="modal-content set-adress-size">
+				<iframe id="iframe-address"></iframe>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+</body>
+<script src="lib/app.bundle.js"></script>
+</html>

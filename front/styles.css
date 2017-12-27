@@ -1,0 +1,20 @@
+.btn-player {
+	margin: 6px 0px;
+	/*font-family: monospace;*/
+	z-index: 100;
+}
+.btn-player {
+	width: 100%;
+}
+#mainscreen {
+	margin: 0 auto;
+}
+.set-adress-size {
+	height: 98%;
+}
+#iframe-address {
+	height: 92%;
+}
+.hidden {
+	display: none
+}
