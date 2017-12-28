@@ -78,8 +78,8 @@ var model = {
 	slots: []
 };
 
-var urlGetSlots = '/basket/api/game/slots';
-var urlBookSlot = '/basket/api/game/book/';
+var urlGetSlots = '/api/game/slots';
+var urlBookSlot = '/api/game/book/';
 
 function getServerData(url, opts, callback, real) {
 	statusStartLoading();

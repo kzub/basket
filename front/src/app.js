@@ -6,8 +6,8 @@ let model = {
 	slots: []
 };
 
-let urlGetSlots = '/basket/api/game/slots';
-let urlBookSlot = '/basket/api/game/book/';
+let urlGetSlots = '/api/game/slots';
+let urlBookSlot = '/api/game/book/';
 
 function getServerData (url, opts, callback, real) {
 	statusStartLoading();

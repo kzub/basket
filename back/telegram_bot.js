@@ -1,11 +1,12 @@
 const request = require('async-request');
 const utils = require('./utils');
-const config = utils.getBotSettings();
+const config = utils.getConfig();
 
-const botURL = `https://api.telegram.org/bot${config.token}/`;
+const botURL = `https://api.telegram.org/bot${config.telegram.token}/`;
 const recipients = {
-	owner: config.owner,
-	channel: config.channel
+	owner: config.telegram.owner,
+	channel: config.telegram.channel,
+	channelTest: config.telegram.channelTest
 };
 
 async function botCmd(method, params) {

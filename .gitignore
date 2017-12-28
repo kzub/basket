@@ -1,6 +1,6 @@
 back/node_modules
 front/node_modules
 deploy.sh
-back/settings.json
-back/bot.settings.json
+back/settings*.json
+back/start.sh
 
