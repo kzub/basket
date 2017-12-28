@@ -109,9 +109,9 @@ app.get('/api/game/book/:name/:phone', async function (req, res) {
     });
 
     let freeSlots = game.maxPlayers - players.length;
-    bot.send('owner', `Book ok: ${game.id}/${player.id} ${player.firstName} ${player.surName} ${player.tel} slots: ${freeSlots}`);
+    bot.send('owner', `Book ok: ${game.id}/${player.id} ${player.firstName} ${player.surName} ${tel} slots: ${freeSlots}`);
     autoCancelation.add(game.id, player, engine.deletePlayer);
-    console.log(`BOOK OK game ${game.id} - ${player.id} ${player.firstName} ${player.surName} ${player.tel}`);
+    console.log(`BOOK OK game ${game.id} - ${player.id} ${player.firstName} ${player.surName} ${tel}`);
   } catch(e) {
     res.status(500).send(
       makeError('/api/game/book', req.params, e));
