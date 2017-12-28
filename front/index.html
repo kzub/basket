@@ -20,11 +20,11 @@
 		<div class="card-body">
 			<h4 class="card-title">м. Дмитровская</h4>
 
-			
-			<h6 class="card-subtitle mb-2 text-muted">Фитнес-клуб Манхэттен 
+
+			<h6 class="card-subtitle mb-2 text-muted">Фитнес-клуб Манхэттен
 				<a id="button-address" href="#">(схема проезда)</a>
 			</h6>
-			
+
 			<div id="main">
 				<div id="dateAccordion" data-children=".item">
 					<div class="item">
@@ -62,9 +62,14 @@
 								<h4 class="card-title"><span id="pay-amount-title">-</span> рублей</h4>
 								<form id="submitform" method="POST" action="https://money.yandex.ru/quickpay/confirm.xml">
 									<div class="form-group">
-										<input type="text" class="form-control" id="custom-fio" aria-describedby="emailHelp" 
-										placeholder="Введите Фамилию и Имя" required>
+										<input type="text" class="form-control" id="custom-fio" aria-describedby="emailHelp"
+										placeholder="Фамилия и Имя" required>
 										<small id="emailHelp" class="form-text text-muted">Необходимо для прохода на площадку</small>
+									</div>
+									<div class="form-group">
+										<input type="text" class="form-control" id="custom-phone" aria-describedby="phoneHelp"
+										placeholder="Номер телефона" required>
+										<small id="phoneHelp" class="form-text text-muted">Для связи, в случае каких-либо изменений</small>
 									</div>
 									<input type="hidden" name="receiver" value="410015876343196">
 									<input type="hidden" name="quickpay-form" value="donate">

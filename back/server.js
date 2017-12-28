@@ -52,7 +52,7 @@ app.get('/api/game/slots', async function (req, res) {
   }
 });
 
-app.get('/api/game/book/:name', async function (req, res) {
+app.get('/api/game/book/:name/:phone', async function (req, res) {
   try {
     console.log('GAME BOOK SLOT ->');
 
@@ -61,9 +61,16 @@ app.get('/api/game/book/:name', async function (req, res) {
     let players = await engine.getPlayers(game.id);
 
     let [firstName, surName] = req.params.name.split(' ');
-    if (!firstName || !surName){
+    if (!firstName || !surName) {
       res.send(
-        makeError('Ошибка входных данных!', req.params));
+        makeError('Ошибка входных данных! Имя Фамилия', req.params));
+      return;
+    }
+
+    let tel = req.params.phone;
+    if (!tel) {
+      res.send(
+        makeError('Ошибка входных данных! Телефон', req.params));
       return;
     }
 
@@ -80,10 +87,11 @@ app.get('/api/game/book/:name', async function (req, res) {
         return;
       }
 
-      console.log('MAKE booking', firstName, surName);
+      console.log('MAKE booking', firstName, surName, tel);
       player = await engine.addPlayer(game.id, {
         firstName: firstName,
         surName: surName,
+        tel: tel,
         sum: game.priceBookEngine
       });
 
@@ -101,9 +109,9 @@ app.get('/api/game/book/:name', async function (req, res) {
     });
 
     let freeSlots = game.maxPlayers - players.length;
-    bot.send('owner', `Book ok: ${game.id}/${player.id} ${player.firstName} ${player.surName} slots: ${freeSlots}`);
+    bot.send('owner', `Book ok: ${game.id}/${player.id} ${player.firstName} ${player.surName} ${player.tel} slots: ${freeSlots}`);
     autoCancelation.add(game.id, player, engine.deletePlayer);
-    console.log(`BOOK OK game ${game.id} - ${player.id} ${player.firstName} ${player.surName}`);
+    console.log(`BOOK OK game ${game.id} - ${player.id} ${player.firstName} ${player.surName} ${player.tel}`);
   } catch(e) {
     res.status(500).send(
       makeError('/api/game/book', req.params, e));
@@ -147,7 +155,7 @@ app.post('/api/game/payment/complete', async function (req, res) {
     let amount = req.body.withdraw_amount;
     let freeSlots = game.maxPlayers - players.length;
     bot.send('owner', `Pay ok: ${game.id}/${player.id} ${player.firstName} ${player.surName} ${amount} руб.`);
-    bot.send('channelTest', `${player.firstName} ${player.surName} записался на игру\r\nСвободных мест: ${freeSlots}`);
+    bot.send('channel', `${player.firstName} ${player.surName} записался на игру\r\nСвободных мест: ${freeSlots}`);
     autoCancelation.del(game.id, player);
     console.log('OK', playerId, player.firstName, player.surName, amount);
   } catch(e) {
@@ -163,6 +171,7 @@ console.log('TODO: убрать номер телефона и почту в к�
 app.listen(config.server.port);
 console.log(`listen on ${config.server.port}`);
 
+// listen for events new from baskmsk system
 smtpEvents.addHandler(async () => {
   let game = await utils.getGameSettings();
   if (game.engine != 'basketmsk') {
@@ -178,7 +187,7 @@ smtpEvents.addHandler(async () => {
   }
 
   let freeSlots = game.maxPlayers - players.length;
-  bot.send('owner', `${last.firstName} ${last.surName} записался на игру\r\nСвободных мест: ${freeSlots}`);
+  bot.send('channel', `${last.firstName} ${last.surName} записался на игру\r\nСвободных мест: ${freeSlots}`);
 });
 
 function makeError(msg) {

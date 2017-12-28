@@ -7,7 +7,7 @@ let model = {
 };
 
 let urlGetSlots = '/api/game/slots';
-let urlBookSlot = '/api/game/book/';
+let urlBookSlot = '/api/game/book';
 
 function getServerData (url, opts, callback, real) {
 	statusStartLoading();
@@ -99,9 +99,9 @@ window.onload = () => {
 	// Playground contacts
 	$('#button-address').on('click', e =>{
 		$('#iframe-address').attr('src', 'https://www.manfit.ru/kontakty/');
-		$('#modal-address').modal();		
+		$('#modal-address').modal();
 	});
-	
+
 	// Success screen
 	if (document.URL.indexOf('#success') > -1) {
 		document.location = document.URL.replace('#success', '#');
@@ -136,13 +136,19 @@ window.onload = () => {
 			showErrorMessage("Введите вашу фамилию и имя.<br>Эти данные нужны для прохода на площадку.");
 			return;
 		}
+		if (!validatePlayerPhone()) {
+			showErrorMessage("Введите телефон для связи.<br>В случае непредвиденной отмены игры, организатор сможет вас предупредить.");
+			return;
+		}
+
 		let name = getPlayerFIO();
-		getServerData(urlBookSlot + name, {}, result => {
+		let phone = getPlayerPhone();
+		getServerData(`${urlBookSlot}/${name}/${phone}`, {}, result => {
 			if (result.success && isFinite(result.gameId) && isFinite(result.playerId)) {
 				console.log(result);
 				let label = [result.gameId, result.playerId].join('|');
 				$('#orderlabel').val(label);
-				
+
 				let target = $('#ordertarget');
 				target.val([target.val(), result.gameId, result.playerId, name].join(' '));
 
@@ -166,7 +172,17 @@ function clearHash(url){
 }
 
 function getPlayerFIO(){
-	return $('#custom-fio').val();
+	let val = $('#custom-fio').val();
+	if (typeof val === 'string') {
+		return val.replace(/\//g, '');
+	}
+}
+
+function getPlayerPhone(){
+	let val = $('#custom-phone').val();
+	if (typeof val === 'string') {
+		return val.replace(/\//g, '');
+	}
 }
 
 function validatePlayerFIO() {
@@ -176,6 +192,18 @@ function validatePlayerFIO() {
 	}
 	let parts = text.split(' ');
 	if(parts.length < 2) {
+		return;
+	}
+	return true;
+}
+
+function validatePlayerPhone() {
+	let text = getPlayerPhone();
+	if (!text) {
+		return;
+	}
+
+	if(text.length < 10) {
 		return;
 	}
 	return true;
@@ -197,7 +225,7 @@ function showMessage(title, msg, callback) {
 	  	if (callback) {
 	  		callback();
 	  	}
-		});		
+		});
 	}
 }
 
