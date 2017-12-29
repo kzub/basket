@@ -1,6 +1,7 @@
 const arequest = require('async-request');
 const extend = require('util')._extend;
 const utils = require('./utils');
+const config = utils.getConfig();
 
 const headers = {
   'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
@@ -22,9 +23,10 @@ const urlGameAddPlayer = 'http://basketmsk.ru/admin/games/add_user/';
 const urlGameDeletePlayer = 'http://basketmsk.ru/admin/games/registered/$GAME/delete/';
 const urlGameModifyPlayer =  'http://basketmsk.ru/admin/games/user/';
 
+// not really real:
 const bookingEmail = "booking@zk.ru";
 const payedEmail = "complete@zk.ru";
-const playerTel = "+79154729813";
+const playerTel = "+79154443322";
 
 async function request(url, opts) {
   console.log('=>', url);
@@ -47,8 +49,8 @@ async function makeAuth(){
   return arequest(urlGameAuth, {
     method: 'POST',
     data: {
-      'form[value1]': 'guest',
-      'form[value2]': '27051983'  // DO NO PUSH IT
+      'form[value1]': config.basketmsk.login,
+      'form[value2]': config.basketmsk.password
     }
   });
 }
