@@ -166,7 +166,6 @@ app.post('/api/game/payment/complete', async function (req, res) {
 
 console.log('TODO: качнуть базу игроков');
 console.log('TODO: проверка денег');
-console.log('TODO: убрать номер телефона и почту в конфиг');
 
 app.listen(config.server.port);
 console.log(`listen on ${config.server.port}`);
