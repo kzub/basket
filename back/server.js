@@ -164,7 +164,6 @@ app.post('/api/game/payment/complete', async function (req, res) {
   }
 });
 
-console.log('TODO: качнуть базу игроков');
 console.log('TODO: проверка денег');
 
 app.listen(config.server.port);
