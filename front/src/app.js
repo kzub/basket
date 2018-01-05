@@ -1,13 +1,13 @@
 import "fetch-polyfill";
 
-let model = {
+const model = {
 	date: "-",
 	time: "-",
 	slots: []
 };
 
-let urlGetSlots = '/api/game/slots';
-let urlBookSlot = '/api/game/book';
+const urlGetSlots = '/api/game/slots';
+const urlBookSlot = '/api/game/book';
 
 function getServerData (url, opts, callback, real) {
 	statusStartLoading();
@@ -143,7 +143,8 @@ window.onload = () => {
 
 		let name = getPlayerFIO();
 		let phone = getPlayerPhone();
-		getServerData(`${urlBookSlot}/${name}/${phone}`, {}, result => {
+		let code = document.location.search.replace(/(\?|&|\/|\s)/g, '');
+		getServerData(`${urlBookSlot}/${name}/${phone}/${code}`, {}, result => {
 			if (result.success && isFinite(result.gameId) && isFinite(result.playerId)) {
 				console.log(result);
 				let label = [result.gameId, result.playerId].join('|');
@@ -152,7 +153,11 @@ window.onload = () => {
 				let target = $('#ordertarget');
 				target.val([target.val(), result.gameId, result.playerId, name].join(' '));
 
-				$('#submitform').submit();
+				if(result.payed){
+					showMessage('Информация', 'Запись произведена!');
+				} else {
+					$('#submitform').submit();
+				}
 			} else {
 				showErrorMessage(result.error);
 			}

@@ -52,13 +52,18 @@ app.get('/api/game/slots', async function (req, res) {
   }
 });
 
-app.get('/api/game/book/:name/:phone', async function (req, res) {
+app.get('/api/game/book/:name/:phone/:code?', async function (req, res) {
   try {
-    console.log('GAME BOOK SLOT ->');
+    console.log('GAME BOOK SLOT ->', req.params);
 
+    let bookPayed = req.params.code === config.admin.password;
+    if (bookPayed) {
+      console.log('ADMIN PASSWORD USED. MAKE FREE BOOKING');
+    }
     let game = await utils.getGameSettings();
     let engine = engines[game.engine];
     let players = await engine.getPlayers(game.id);
+    let freeSlots = game.maxPlayers - players.length;
 
     let [firstName, surName] = req.params.name.split(' ');
     if (!firstName || !surName) {
@@ -73,7 +78,6 @@ app.get('/api/game/book/:name/:phone', async function (req, res) {
         makeError('Ошибка входных данных! Телефон', req.params));
       return;
     }
-
     let player;
     let playerBookings = players.filter(p => !p.payed && utils.eq(p.firstName, firstName) &&
                                                          utils.eq(p.surName, surName));
@@ -92,7 +96,8 @@ app.get('/api/game/book/:name/:phone', async function (req, res) {
         firstName: firstName,
         surName: surName,
         tel: tel,
-        sum: game.priceBookEngine
+        sum: game.priceBookEngine,
+        payed: bookPayed
       });
 
       if (!player) {
@@ -100,17 +105,23 @@ app.get('/api/game/book/:name/:phone', async function (req, res) {
           makeError('Регистрация не удалась!', players));
         return;
       }
+      freeSlots--;
     }
 
     res.send({
       gameId: game.id,
       playerId: player.id,
-      success: true
+      success: true,
+      payed: bookPayed
     });
 
-    let freeSlots = game.maxPlayers - players.length;
-    bot.send('owner', `Book ok: ${game.id}/${player.id} ${player.firstName} ${player.surName} ${tel} slots: ${freeSlots}`);
-    autoCancelation.add(game.id, player, engine.deletePlayer);
+    if (bookPayed) {
+      bot.send('owner', `Pay ok: [No Money] ${game.id}/${player.id} ${player.firstName} ${player.surName} ${tel} slots: ${freeSlots}`);
+      bot.send('channel', `${player.firstName} ${player.surName} записался на игру\r\nСвободных мест: ${freeSlots}`);
+    } else {
+      bot.send('owner', `Book ok: ${game.id}/${player.id} ${player.firstName} ${player.surName} ${tel} slots: ${freeSlots}`);
+      autoCancelation.add(game.id, player, engine.deletePlayer);
+    }
     console.log(`BOOK OK game ${game.id} - ${player.id} ${player.firstName} ${player.surName} ${tel}`);
   } catch(e) {
     res.status(500).send(

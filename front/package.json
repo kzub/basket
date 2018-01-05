@@ -4,7 +4,8 @@
   "description": "basketball booking platform",
   "main": "server.js",
   "scripts": {
-    "build": "webpack"
+    "build": "webpack",
+    "dev": "webpack --watch"
   },
   "author": "Zubkov Konstantin",
   "license": "MIT",
