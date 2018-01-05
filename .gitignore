@@ -3,5 +3,4 @@ front/node_modules
 front/lib
 deploy.sh
 back/settings*.json
-back/start.sh
 
