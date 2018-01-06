@@ -117,7 +117,7 @@ app.get('/api/game/book/:name/:phone/:code?', async function (req, res) {
 
     if (bookPayed) {
       bot.send('owner', `Pay ok: [No Money] ${game.id}/${player.id} ${player.firstName} ${player.surName} ${tel} slots: ${freeSlots}`);
-      bot.send('channel', `${player.firstName} ${player.surName} записался на игру\r\nСвободных мест: ${freeSlots}`);
+      bot.send('channel', `${player.firstName} ${player.surName} записался на игру ${game.date}\r\nСвободных мест: ${freeSlots}`);
     } else {
       bot.send('owner', `Book ok: ${game.id}/${player.id} ${player.firstName} ${player.surName} ${tel} slots: ${freeSlots}`);
       autoCancelation.add(game.id, player, engine.deletePlayer);
@@ -166,7 +166,7 @@ app.post('/api/game/payment/complete', async function (req, res) {
     let amount = req.body.withdraw_amount;
     let freeSlots = game.maxPlayers - players.length;
     bot.send('owner', `Pay ok: ${game.id}/${player.id} ${player.firstName} ${player.surName} ${amount} руб.`);
-    bot.send('channel', `${player.firstName} ${player.surName} записался на игру\r\nСвободных мест: ${freeSlots}`);
+    bot.send('channel', `${player.firstName} ${player.surName} записался на игру ${game.date}\r\nСвободных мест: ${freeSlots}`);
     autoCancelation.del(game.id, player);
     console.log('OK', playerId, player.firstName, player.surName, amount);
   } catch(e) {
@@ -196,7 +196,7 @@ smtpEvents.addHandler(async () => {
   }
 
   let freeSlots = game.maxPlayers - players.length;
-  bot.send('channel', `${last.firstName} ${last.surName} записался на игру\r\nСвободных мест: ${freeSlots}`);
+  bot.send('channel', `${last.firstName} ${last.surName} записался на игру ${game.date}\r\nСвободных мест: ${freeSlots}`);
 });
 
 function makeError(msg) {
