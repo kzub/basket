@@ -117,7 +117,7 @@ app.get('/api/game/book/:name/:phone/:code?', async function (req, res) {
 
     if (bookPayed) {
       bot.send('owner', `Pay ok: [No Money] ${game.id}/${player.id} ${player.firstName} ${player.surName} ${tel} slots: ${freeSlots}`);
-      bot.send('channel', `${player.firstName} ${player.surName} записался на игру ${game.date}\r\nСвободных мест: ${freeSlots}`);
+      bot.send('channel', `${player.firstName} ${player.surName} записался на игру ${game.date}\r\nСвободных мест: ${freeSlots}, запись на basket.msk.ru`);
     } else {
       bot.send('owner', `Book ok: ${game.id}/${player.id} ${player.firstName} ${player.surName} ${tel} slots: ${freeSlots}`);
       autoCancelation.add(game.id, player, engine.deletePlayer);
@@ -138,9 +138,10 @@ app.post('/api/game/payment/complete', async function (req, res) {
     let game = await utils.getGameSettings();
     let engine = engines[game.engine];
     let [gameId, playerId] = req.body.label.split('|');
+    let amount = req.body.withdraw_amount;
 
     if(game.id != gameId) {
-      printError('Wrong game id in payment! current is:' + game.id);
+      printError(`Wrong game id in payment! current is: ${game.id}, ${amount} руб.`);
       return;
     }
     let players = await engine.getPlayers(gameId);
@@ -163,10 +164,9 @@ app.post('/api/game/payment/complete', async function (req, res) {
       return;
     }
 
-    let amount = req.body.withdraw_amount;
     let freeSlots = game.maxPlayers - players.length;
     bot.send('owner', `Pay ok: ${game.id}/${player.id} ${player.firstName} ${player.surName} ${amount} руб.`);
-    bot.send('channel', `${player.firstName} ${player.surName} записался на игру ${game.date}\r\nСвободных мест: ${freeSlots}`);
+    bot.send('channel', `${player.firstName} ${player.surName} записался на игру ${game.date}\r\nСвободных мест: ${freeSlots}, запись на basket.msk.ru`);
     autoCancelation.del(game.id, player);
     console.log('OK', playerId, player.firstName, player.surName, amount);
   } catch(e) {
@@ -196,7 +196,7 @@ smtpEvents.addHandler(async () => {
   }
 
   let freeSlots = game.maxPlayers - players.length;
-  bot.send('channel', `${last.firstName} ${last.surName} записался на игру ${game.date}\r\nСвободных мест: ${freeSlots}`);
+  bot.send('channel', `${last.firstName} ${last.surName} записался на игру ${game.date}\r\nСвободных мест: ${freeSlots}, запись на basket.msk.ru`);
 });
 
 function makeError(msg) {
