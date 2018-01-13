@@ -5,7 +5,7 @@ const eventCallbacks = [];
 
 exports.addHandler = callback => {
   if (!(callback instanceof Function)) {
-    console.log('SMTP ERROR addHandle() bad callback');
+    console.log('SMTP --- ERROR addHandle() bad callback');
     return;
   }
 
@@ -14,11 +14,25 @@ exports.addHandler = callback => {
 
 function checkEvent(data) {
   if (data.indexOf(config.smtp.email) > -1) {
-    console.log('SMTP GOT EVENT!');
+    console.log('SMTP --- GOT EVENT for:', config.smtp.email);
     for (let idx in eventCallbacks) {
-      eventCallbacks[idx]();
+      eventCallbacks[idx](data);
     }
   }
+
+  if (config.smtp.forwardPort) {
+    console.log('SMTP >>> FORWARD MESSAGE >>>');
+    sendDataToDev(data);
+  }
+}
+
+function sendDataToDev(data) {
+  const client = net.createConnection({ port: config.smtp.forwardPort }, () => {
+    client.end(data);
+  });
+  client.on('error', e => {
+    console.log(`SMTP --- FORWARD ERROR: ${e}`);
+  });
 }
 
 const server = net.createServer((c) => {
@@ -57,12 +71,16 @@ const server = net.createServer((c) => {
       write('250 ok');
     }
   });
+
+  c.on('error', e => {
+    console.log(`SMTP <<< ERROR: ${e}`);
+  });
 });
 
 server.on('error', (err) => {
   console.log('SMTP --- ERROR:', err);
 });
 
-server.listen(25, () => {
-  console.log('SMTP --- server bound');
+server.listen(config.smtp.port, () => {
+  console.log('SMTP --- server bound to port:', config.smtp.port);
 });

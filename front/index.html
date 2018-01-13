@@ -10,11 +10,8 @@
 	<link rel="icon" type="image/png" sizes="96x96" href="/icons/favicon-96x96.png">
 	<link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png">
 
-	<link rel="stylesheet" href="styles.css">
-
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
 	<title>Basketball</title>
 </head>
 <body>
@@ -31,39 +28,74 @@
 
 			<div id="main">
 				<div id="dateAccordion" data-children=".item">
-					<div class="item">
+					<div game="0" class="item game-item">
 						<div class="card card-header">
-							<a id="players-head" data-toggle="collapse" data-parent="#dateAccordion" href="#players">
-								<h4 id="gameDate">Загружается...</h4>
-								<span id="gameTime"></span>
+							<a game="0" class="players-head" data-toggle="collapse" data-parent="#dateAccordion" href="#players0">
+								<div class="flex-container">
+									<div>
+										<h4 game="0" class="gameDate">Загружается...</h4>
+										<span game="0" class="gameTime"></span>
+									</div>
+									<h4 game="0" class="slotsUsed"></h4>
+								</div>
 							</a>
 						</div>
-						<div id="players" class="collapse">
-							<div id="players-list" class="card-body">
-								<h5 id="noSlotsMessage" class="card-title">Свободных мест нет</h5>
-								<a href="#" slot="0" class="btn-player btn disabled">-</a>
-								<a href="#" slot="1" class="btn-player btn disabled">-</a>
-								<a href="#" slot="2" class="btn-player btn disabled">-</a>
-								<a href="#" slot="3" class="btn-player btn disabled">-</a>
-								<a href="#" slot="4" class="btn-player btn disabled">-</a>
-								<a href="#" slot="5" class="btn-player btn disabled">-</a>
-								<a href="#" slot="6" class="btn-player btn disabled">-</a>
-								<a href="#" slot="7" class="btn-player btn disabled">-</a>
-								<a href="#" slot="8" class="btn-player btn disabled">-</a>
-								<a href="#" slot="9" class="btn-player btn disabled">-</a>
+						<div game="0" id="players0" class="players collapse">
+							<div game="0" class="card-body players-list">
+								<h5 game="0" class="noSlotsMessage card-title">Свободных мест нет</h5>
+								<a href="#" game="0" slot="0" class="btn-player btn disabled">-</a>
+								<a href="#" game="0" slot="1" class="btn-player btn disabled">-</a>
+								<a href="#" game="0" slot="2" class="btn-player btn disabled">-</a>
+								<a href="#" game="0" slot="3" class="btn-player btn disabled">-</a>
+								<a href="#" game="0" slot="4" class="btn-player btn disabled">-</a>
+								<a href="#" game="0" slot="5" class="btn-player btn disabled">-</a>
+								<a href="#" game="0" slot="6" class="btn-player btn disabled">-</a>
+								<a href="#" game="0" slot="7" class="btn-player btn disabled">-</a>
+								<a href="#" game="0" slot="8" class="btn-player btn disabled">-</a>
+								<a href="#" game="0" slot="9" class="btn-player btn disabled">-</a>
+							</div>
+						</div>
+					</div>
+
+					<div game="1" class="item game-item hidden">
+						<div class="card card-header">
+							<a game="1" class="players-head" data-toggle="collapse" data-parent="#dateAccordion" href="#players1">
+								<div class="flex-container">
+									<div>
+										<h4 game="1" class="gameDate">Загружается...</h4>
+										<span game="1" class="gameTime"></span>
+									</div>
+									<h4 game="1" class="slotsUsed"></h4>
+								</div>
+							</a>
+						</div>
+						<div game="1" id="players1" class="players collapse">
+							<div game="1" class="players-list card-body">
+								<h5 game="1" class="noSlotsMessage card-title">Свободных мест нет</h5>
+								<a href="#" game="1" slot="0" class="btn-player btn disabled">-</a>
+								<a href="#" game="1" slot="1" class="btn-player btn disabled">-</a>
+								<a href="#" game="1" slot="2" class="btn-player btn disabled">-</a>
+								<a href="#" game="1" slot="3" class="btn-player btn disabled">-</a>
+								<a href="#" game="1" slot="4" class="btn-player btn disabled">-</a>
+								<a href="#" game="1" slot="5" class="btn-player btn disabled">-</a>
+								<a href="#" game="1" slot="6" class="btn-player btn disabled">-</a>
+								<a href="#" game="1" slot="7" class="btn-player btn disabled">-</a>
+								<a href="#" game="1" slot="8" class="btn-player btn disabled">-</a>
+								<a href="#" game="1" slot="9" class="btn-player btn disabled">-</a>
 							</div>
 						</div>
 					</div>
 
 					<div class="item">
 						<div class="card card-header">
-							<a id="pay-btn" data-toggle="collapse" data-parent="#dateAccordion">
+							<a id="pay-btn" class="pay-head" data-toggle="collapse" data-parent="#dateAccordion">
 								<h4>Оплата</h4>
 							</a>
 						</div>
 						<div id="pay" class="collapse" role="tabpanel">
 							<div class="card-body">
-								<h4 class="card-title"><span id="pay-amount-title">-</span> рублей</h4>
+								<h4 class="card-text" id="pay-game-info-date"></h4>
+								<h6 class="card-text" id="pay-game-info-time"></h6>
 								<form id="submitform" method="POST" action="https://money.yandex.ru/quickpay/confirm.xml">
 									<div class="form-group">
 										<input type="text" class="form-control" id="custom-fio" aria-describedby="emailHelp"
@@ -82,6 +114,9 @@
 									<input id="pay-amount-value" type="hidden" name="sum" value="0" data-type="number">
 									<input id="orderlabel" type="hidden" name="label" value="0">
 									<input id="successURL" type="hidden" name="successURL" value="">
+									<h5 class="card-title">
+										<span id="pay-amount-title">-</span> рублей
+									</h5>
 									<a id="paybutton" href="#" class="btn btn-primary">Оплатить</a>
 								</form>
 							</div>
@@ -125,5 +160,4 @@
 	</div>
 </div>
 </body>
-<script src="lib/app.bundle.js"></script>
 </html>

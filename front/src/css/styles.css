@@ -2,8 +2,6 @@
 	margin: 6px 0px;
 	/*font-family: monospace;*/
 	z-index: 100;
-}
-.btn-player {
 	width: 100%;
 }
 #mainscreen {
@@ -17,4 +15,11 @@
 }
 .hidden {
 	display: none
+}
+
+.flex-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
 }

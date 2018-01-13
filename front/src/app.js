@@ -1,9 +1,8 @@
 import "fetch-polyfill";
+require('./css/styles.css');
 
 const model = {
-	date: "-",
-	time: "-",
-	slots: []
+	selectedGame: 0
 };
 
 const urlGetSlots = '/api/game/slots';
@@ -28,18 +27,23 @@ function getServerData (url, opts, callback, real) {
 	});
 }
 
-function fillGameDateTime(date, time) {
-	$('#gameTime').text(time);
-	$('#gameDate').text(date);
+function fillUsedSlots(id, slots){
+	let used = slots.filter(s => s.status !== "free").length;
+	$(`[game*=${id}].slotsUsed`).text(`${used}/${slots.length}`);
 }
 
-function fillPlayerNames(slots) {
-	let buttons = $('.btn-player');
-	let freeSlotExist;
-	let pl = $('#players-list');
+function fillGameDateTime(id, date, time) {
+	$(`[game*=${id}].gameTime`).text(time);
+	$(`[game*=${id}].gameDate`).text(date);
+}
 
-	for (let idx in model.slots) {
-  	let slot = model.slots[idx];
+function fillPlayerNames(id, slots) {
+	let buttons = $(`[game*=${id}].btn-player`);
+	let freeSlotExist;
+	let pl = $(`[game*=${id}].players-list`);
+
+	for (let idx in slots) {
+  	let slot = slots[idx];
   	let button = buttons[idx];
   	button.text = slot.player;
   	let cls = button.getAttribute('class');
@@ -55,21 +59,23 @@ function fillPlayerNames(slots) {
   	}
   }
 
-  showMessageNoFreeSlots(!freeSlotExist);
+  showMessageNoFreeSlots(id, !freeSlotExist);
 }
 
-function fillGamePrice(price) {
-	if (isFinite(price)) {
-		$('#pay-amount-title').text(price);
-		$('#pay-amount-value').val(price);
-	}
+function setGameInfo(game) {
+	model.selectedGame = game.gameId;
+	let price = isFinite(game.price) ? game.price : 0;
+	$(`#pay-amount-title`).text(price);
+	$(`#pay-amount-value`).val(price);
+	$(`#pay-game-info-date`).text(game.date);
+	$(`#pay-game-info-time`).text(`(${game.time})`);
 }
 
-function showMessageNoFreeSlots(yes) {
+function showMessageNoFreeSlots(id, yes) {
 	if (yes) {
-		$('#noSlotsMessage').removeClass('hidden');
+		$(`[game*=${id}].noSlotsMessage`).removeClass('hidden');
 	} else {
-		$('#noSlotsMessage').addClass('hidden');
+		$(`[game*=${id}].noSlotsMessage`).addClass('hidden');
 	}
 }
 
@@ -78,19 +84,37 @@ function updatePlayersList(n) {
 		for(let k in data){
 			model[k] = data[k];
 		}
-		fillPlayerNames(data.slots);
-		fillGameDateTime(data.date, data.time);
-		fillGamePrice(data.price);
-		showPlayersOnce();
 
-		if (n > 0 && hasBookingProcess(data.slots)) {
+		hideAllGames();
+		for (let id in data.games) {
+			enableGame(id);
+			fillPlayerNames(id, data.games[id].slots);
+			fillGameDateTime(id, data.games[id].date, data.games[id].time);
+			fillUsedSlots(id, data.games[id].slots);
+		}
+		// showPlayersOnce();
+
+		if (n > 0 && hasBookingProcess(data.games)) {
 			setTimeout(updatePlayersList, 2000, n - 1);
 		}
 	});
 }
 
-function hasBookingProcess(slots) {
-	return slots.filter(s => s.status === 'booking').length > 0;
+function hasBookingProcess(games) {
+	for (let game of games) {
+		if (game.slots.filter(s => s.status === 'booking').length > 0) {
+			return true;
+		}
+	}
+	return false;
+}
+
+function hideAllGames() {
+	$('.game-item').addClass('hidden')
+}
+
+function enableGame(id) {
+	$(`[game*=${id}].game-item`).removeClass('hidden')	
 }
 
 window.onload = () => {
@@ -118,16 +142,15 @@ window.onload = () => {
 	// Slot click
 	$('.btn-player').on('click', el => {
 		let slot = Number(el.target.getAttribute('slot'));
-		let available = model.slots[slot].status == "free";
+		let num = Number(el.target.getAttribute('game'));
+		let game = model.games[num];
+		console.log(model)
+		let available = game.slots[slot].status == "free";
 		if (available) {
-			showPlayers(false);
+			setGameInfo(game);
+			showPlayers(false, num);
 			showPay(true);
 		}
-	});
-
-	// Game date click
-	$('#players-head').on('click', (el) => {
-		showPay(false);
 	});
 
 	// Pay click
@@ -144,7 +167,7 @@ window.onload = () => {
 		let name = getPlayerFIO();
 		let phone = getPlayerPhone();
 		let code = document.location.search.replace(/(\?|&|\/|\s)/g, '');
-		getServerData(`${urlBookSlot}/${name}/${phone}/${code}`, {}, result => {
+		getServerData(`${urlBookSlot}/${model.selectedGame}/${name}/${phone}/${code}`, {}, result => {
 			if (result.success && isFinite(result.gameId) && isFinite(result.playerId)) {
 				console.log(result);
 				let label = [result.gameId, result.playerId].join('|');
@@ -234,18 +257,19 @@ function showMessage(title, msg, callback) {
 	}
 }
 
-function showPlayers(yes) {
+function showPlayers(yes, id) {
+	let filter = isFinite(id) ? `[game*=${id}]` : '';
 	if (yes) {
-		$('#players.collapse').collapse('show');
+		$(`${filter}.players.collapse`).collapse('show');
 	} else {
-		$('#players.collapse').collapse('hide');
+		$(`${filter}.players.collapse`).collapse('hide');
 	}
 }
 
 var playersOnceShowed = false;
 function showPlayersOnce() {
 	if (!playersOnceShowed) {
-		showPlayers(true);
+		showPlayers(true, 0);
 		playersOnceShowed = true;
 	}
 }

@@ -21,38 +21,50 @@ app.get('/', function (req, res) {
 app.get('/api/game/slots', async function (req, res) {
   try {
     console.log('GAME GET SLOTS ->');
-    let game = await utils.getGameSettings();
-    let engine = engines[game.engine];
-    let players = await engine.getPlayers(game.id);
-    let slots = [];
-    players.reverse();
+    let games = await utils.getGameSettings();
+    let result = [];
 
-    for (let idx = 0; idx < game.maxPlayers; idx++) {
-      let p = players[idx];
-      if (p && p.payed) {
-        slots.push({"status":"used", "player":`${p.firstName} ${p.surName}`});
-      } else if(p) {
-        slots.push({"status":"booking", "player":"В процессе оплаты"});
-      } else {
-        slots.push({"status":"free", "player":"Забронировать"});
-      }
+    for (let game of games) {
+      let slots = await getGameSlots(game);
+      result.push({
+        gameId: game.id,
+        date: game.date,
+        time: game.time,
+        price: game.price,
+        slots: slots
+      });
+      let playersCount = slots.filter(s => s.status !== 'free').length;
+      console.log(`OK game ${game.id} - ${playersCount}/${slots.length}`);
     }
 
-    console.log(`OK game ${game.id} - ${players.length}/${slots.length}`);
-    res.send({
-      gameId: game.id,
-      date: game.date,
-      time: game.time,
-      price: game.price,
-      slots: slots
-    });
+    res.send({ games: result });
   } catch(e) {
     res.status(500).send(
       makeError('/api/game/slots', e));
   }
 });
 
-app.get('/api/game/book/:name/:phone/:code?', async function (req, res) {
+async function getGameSlots(game) {
+  let engine = engines[game.engine];
+  let players = await engine.getPlayers(game.id);
+  let slots = [];
+  players.reverse();
+
+  for (let idx = 0; idx < game.maxPlayers; idx++) {
+    let p = players[idx];
+    if (p && p.payed) {
+      slots.push({"status":"used", "player":`${p.firstName} ${p.surName}`});
+    } else if(p) {
+      slots.push({"status":"booking", "player":"В процессе оплаты"});
+    } else {
+      slots.push({"status":"free", "player":"Забронировать"});
+    }
+  }
+
+  return slots;
+}
+
+app.get('/api/game/book/:gameId/:name/:phone/:code?', async function (req, res) {
   try {
     console.log('GAME BOOK SLOT ->', req.params);
 
@@ -60,7 +72,13 @@ app.get('/api/game/book/:name/:phone/:code?', async function (req, res) {
     if (bookPayed) {
       console.log('ADMIN PASSWORD USED. MAKE FREE BOOKING');
     }
-    let game = await utils.getGameSettings();
+    let game = await utils.findGame(req.params.gameId);
+    if (!game) {
+       res.send(
+        makeError('Внутреняя ошибка. Игра не найдена!', req.params));
+      return;
+    }
+
     let engine = engines[game.engine];
     let players = await engine.getPlayers(game.id);
     let freeSlots = game.maxPlayers - players.length;
@@ -135,15 +153,15 @@ app.post('/api/game/payment/complete', async function (req, res) {
     console.log(req.body);
     res.send('OK');
 
-    let game = await utils.getGameSettings();
-    let engine = engines[game.engine];
     let [gameId, playerId] = req.body.label.split('|');
-    let amount = req.body.withdraw_amount;
-
-    if(game.id != gameId) {
-      printError(`Wrong game id in payment! current is: ${game.id}, ${amount} руб.`);
+    let game = await utils.findGame(gameId);
+    if (!game) {
+      printError(`Can not find game with id: ${gameId}, ${amount} руб.`);
       return;
     }
+    let engine = engines[game.engine];
+    let amount = req.body.withdraw_amount;
+
     let players = await engine.getPlayers(gameId);
     let playerBookings = players.filter(p => p.id == playerId && !p.payed);
 
@@ -178,25 +196,24 @@ app.post('/api/game/payment/complete', async function (req, res) {
 console.log('TODO: проверка денег');
 
 app.listen(config.server.port);
-console.log(`listen on ${config.server.port}`);
+console.log(`SERVER --- listen on: ${config.server.port}`);
 
 // listen for events new from baskmsk system
-smtpEvents.addHandler(async () => {
-  let game = await utils.getGameSettings();
-  if (game.engine != 'basketmsk') {
-    printError('Some shit with game settings', game.engine);
+smtpEvents.addHandler(async (data) => {
+  let bookInfo = utils.findBookInfoInMailText(data);
+  if (!bookInfo) {
+    printError('Some shit with mail event');
+    return;
+  }
+  let game = await utils.findGame(bookInfo.gameId);
+  if (!game) {
+    printError('Some shit with game/mailer settings', game);
     return;
   }
 
   let players = await engines.basketmsk.getPlayers(game.id);
-  let last = players.filter(p => p.payed)[0];
-  if (!last) {
-    printError('Some shit with game settings', game.engine, game.id);
-    return;
-  }
-
   let freeSlots = game.maxPlayers - players.length;
-  bot.send('channel', `${last.firstName} ${last.surName} записался на игру ${game.date}\r\nСвободных мест: ${freeSlots}, запись на basket.msk.ru`);
+  bot.send('channel', `${bookInfo.name} записался на игру ${game.date}\r\nСвободных мест: ${freeSlots}, запись на basket.msk.ru`);
 });
 
 function makeError(msg) {

@@ -21,4 +21,6 @@ LOGFILE=/var/log/basketball.log
 while [[ 1 ]]; do
 	echo "Initializing application" | ts '[%Y-%m-%d %H:%M:%S]' >> $LOGFILE
 	sudo -E node server.js | ts '[%Y-%m-%d %H:%M:%S]' >> $LOGFILE
+	sleep 1
 done
+
