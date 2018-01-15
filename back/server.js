@@ -153,6 +153,7 @@ app.post('/api/game/payment/complete', async function (req, res) {
     console.log(req.body);
     res.send('OK');
 
+    let amount = req.body.withdraw_amount;
     let [gameId, playerId] = req.body.label.split('|');
     let game = await utils.findGame(gameId);
     if (!game) {
@@ -160,7 +161,6 @@ app.post('/api/game/payment/complete', async function (req, res) {
       return;
     }
     let engine = engines[game.engine];
-    let amount = req.body.withdraw_amount;
 
     let players = await engine.getPlayers(gameId);
     let playerBookings = players.filter(p => p.id == playerId && !p.payed);
