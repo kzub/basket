@@ -1,3 +1,13 @@
+### BEGIN INIT INFO
+# Provides:          basketmsk
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Start daemon at boot time
+# Description:       Basket backend server
+### END INIT INFO
+
 #!/bin/bash
 export LANGUAGE="en_US.UTF-8"
 export LC_ALL="en_US.UTF-8"
@@ -20,7 +30,6 @@ LOGFILE=/var/log/basketball.log
 
 while [[ 1 ]]; do
 	echo "Initializing application" | ts '[%Y-%m-%d %H:%M:%S]' >> $LOGFILE
-	sudo -E node server.js | ts '[%Y-%m-%d %H:%M:%S]' >> $LOGFILE
+	sudo -E node server.js | ts '[%Y-%m-%d %H:%M:%S]' &>> $LOGFILE
 	sleep 1
 done
-
