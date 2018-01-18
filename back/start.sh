@@ -18,7 +18,7 @@ start() {
 
 	while [[ 1 ]]; do
 		echo "Initializing application" | ts '[%Y-%m-%d %H:%M:%S]' >> $LOGFILE
-		BASKET_MODE=prod /usr/local/bin/node /opt/basketmsk/server.js | ts '[%Y-%m-%d %H:%M:%S]' &>> $LOGFILE
+		BASKET_MODE=prod /usr/local/bin/node /opt/basketmsk/server.js 2>> $LOGFILE | ts '[%Y-%m-%d %H:%M:%S]' >> $LOGFILE
 		sleep 1
 	done
 }
