@@ -9,6 +9,8 @@
 # Description:       Basket backend server
 ### END INIT INFO
 
+#write to -> /etc/init.d/basketmsk 
+
 start() {
 	echo 'Starting service'
 	LOGFILE=/var/log/basketball.log
