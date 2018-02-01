@@ -188,8 +188,16 @@ window.onload = () => {
 	});
 
 	$('#successURL').val(clearHash(document.URL) + '#success');
+
+	document.addEventListener('copy', copyPlayers);
 };
 
+function copyPlayers (e) {
+	let players = model.games[0].slots.map(e => e.player).join('\n');
+  e.clipboardData.setData('text/plain', players);
+  e.clipboardData.setData('text/html', players);
+  e.preventDefault(); // We want our data, not data from any selection, to be written to the clipboard
+}
 
 function clearHash(url){
 	let hash = url.indexOf('#');
