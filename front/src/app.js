@@ -92,7 +92,10 @@ function updatePlayersList(n) {
 			fillGameDateTime(id, data.games[id].date, data.games[id].time);
 			fillUsedSlots(id, data.games[id].slots);
 		}
-		// showPlayersOnce();
+
+		if (data.games.length == 1) {
+			showPlayersOnce();
+		}
 
 		if (n > 0 && hasBookingProcess(data.games)) {
 			setTimeout(updatePlayersList, 2000, n - 1);
@@ -114,7 +117,7 @@ function hideAllGames() {
 }
 
 function enableGame(id) {
-	$(`[game*=${id}].game-item`).removeClass('hidden')	
+	$(`[game*=${id}].game-item`).removeClass('hidden')
 }
 
 window.onload = () => {
