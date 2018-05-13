@@ -154,6 +154,14 @@ app.post('/api/game/payment/complete', async function (req, res) {
     res.send('OK');
 
     let amount = req.body.withdraw_amount;
+
+    if (!req.body.label || req.body.label.indexOf('|') === -1) {
+      const msg = `Custom pay: ${amount} руб. (${(req.body.label || 'no label')}).`;
+      bot.send('owner', msg);
+      console.log(msg);
+      return;
+    }
+
     let [gameId, playerId] = req.body.label.split('|');
     let game = await utils.findGame(gameId);
     if (!game) {

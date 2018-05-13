@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+	<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+
+	<link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="96x96" href="/icons/favicon-96x96.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png">
+
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<title>Basketball</title>
+</head>
+<body>
+
+	<div class="card" id="mainscreen">
+		<h4 class="p-3 mb-2 bg-dark text-white"><center>Перевести деньги</center></h4>
+		<div class="card-body">
+
+			<div id="main">
+				<div id="dateAccordion" data-children=".item">
+
+					<div class="item">
+						<div id="pay" class="collapse show" role="tabpanel">
+							<div class="card-body">
+								<form id="submitform" method="POST" action="https://money.yandex.ru/quickpay/confirm.xml">
+									<div class="form-group">
+										<input type="text" class="form-control" name="label" aria-describedby="nameHelp"
+										placeholder="Фамилия и Имя" required>
+										<small id="nameHelp" class="form-text text-muted">От кого перевод</small>
+									</div>
+									<input type="hidden" name="receiver" value="410015876343196">
+									<input type="hidden" name="quickpay-form" value="donate">
+									<input id="ordertarget" type="hidden" name="targets" value="Оплата баскетбольной площадки ">
+									<input type="hidden" name="paymentType" value="AC">
+
+									<div class="form-group">
+										<input id="pay-amount-value" class="form-control" type="number" name="sum"  data-type="number" aria-describedby="payHelp" placeholder="Cумма перевода" required>
+										<small id="payHelp" class="form-text text-muted">рублей</small>
+									</div>
+
+									<input id="successURL" type="hidden" name="successURL" value="http://basket.msk.ru/success.html">
+
+									<button type="submit" id="paybutton" class="btn btn-primary">Оплатить</button>
+								</form>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+</body>
+</html>
