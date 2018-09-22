@@ -4,4 +4,6 @@ front/lib
 deploy.sh
 back/settings*.json
 front/dist/
+back/basket.*.db
+database.csv
 

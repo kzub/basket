@@ -11,7 +11,8 @@ app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 
 const autoCancelation = require('./autoCancelation');
 const engines = {
-  basketmsk: require('./engine.basketmsk')
+  basketmsk: require('./engine.basketmsk'),
+  sqlite: require('./engine.sqlite')
 };
 
 app.get('/', function (req, res) {
@@ -115,7 +116,8 @@ app.get('/api/game/book/:gameId/:name/:phone/:code?', async function (req, res) 
         surName: surName,
         tel: tel,
         sum: game.priceBookEngine,
-        payed: bookPayed
+        payed: bookPayed,
+        sum: 0,
       });
 
       if (!player) {
@@ -181,7 +183,7 @@ app.post('/api/game/payment/complete', async function (req, res) {
 
     let ok = await engine.updatePlayer({
       id: player.id,
-      sum: game.priceBookEngine,
+      sum: game.priceBookEngine || Math.floor(Number(amount)),
       payed: true
     }, game.id);
 
