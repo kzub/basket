@@ -94,9 +94,9 @@ exports.updatePlayer = async (gameId, player) => {
 
 exports.getGames = async () => {
   const today = new Date();
-  today.setSeconds(59);
-  today.setMinutes(59);
-  today.setHours(23);
+  today.setSeconds(0);
+  today.setMinutes(0);
+  today.setHours(0);
 
   let games = await dbSelect(`SELECT g.id as gameId, * FROM games g LEFT JOIN places p ON g.id = p.id ` +
     `WHERE date > ${today.valueOf()} ORDER BY date DESC`);
