@@ -22,7 +22,7 @@ app.get('/', function (req, res) {
 app.get('/api/game/slots', async function (req, res) {
   try {
     console.log('GAME GET SLOTS ->');
-    let games = await utils.getGameSettings();
+    let games = await engines.sqlite.getGames();
     let result = [];
 
     for (let game of games) {
@@ -32,7 +32,13 @@ app.get('/api/game/slots', async function (req, res) {
         date: game.date,
         time: game.time,
         price: game.price,
-        slots: slots
+        place: {
+          metro: game.place.metro,
+          name: game.place.name,
+          link: game.place.link,
+        },
+        slots: slots,
+        payOnSite: Boolean(game.props.payOnSite),
       });
       let playersCount = slots.filter(s => s.status !== 'free').length;
       console.log(`OK game ${game.id} - ${playersCount}/${slots.length}`);
@@ -46,19 +52,18 @@ app.get('/api/game/slots', async function (req, res) {
 });
 
 async function getGameSlots(game) {
-  let engine = engines[game.engine];
-  let players = await engine.getPlayers(game.id);
+  let players = await engines.sqlite.getPlayers(game.id);
   let slots = [];
   players.reverse();
 
   for (let idx = 0; idx < game.maxPlayers; idx++) {
     let p = players[idx];
     if (p && p.payed) {
-      slots.push({"status":"used", "player":`${p.firstName} ${p.surName}`});
+      slots.push({'status':'used', 'player':`${p.firstName} ${p.surName}`});
     } else if(p) {
-      slots.push({"status":"booking", "player":"В процессе оплаты"});
+      slots.push({'status':'booking', 'player':'В процессе оплаты'});
     } else {
-      slots.push({"status":"free", "player":"Забронировать"});
+      slots.push({'status':'free', 'player':'Забронировать'});
     }
   }
 
@@ -73,15 +78,18 @@ app.get('/api/game/book/:gameId/:name/:phone/:code?', async function (req, res) 
     if (bookPayed) {
       console.log('ADMIN PASSWORD USED. MAKE FREE BOOKING');
     }
-    let game = await utils.findGame(req.params.gameId);
+    let game = await engines.sqlite.getGame(req.params.gameId);
     if (!game) {
-       res.send(
-        makeError('Внутреняя ошибка. Игра не найдена!', req.params));
+      res.send(makeError('Внутреняя ошибка. Игра не найдена!', req.params));
       return;
     }
 
-    let engine = engines[game.engine];
-    let players = await engine.getPlayers(game.id);
+    if (game.price === 0) {
+      bookPayed = true;
+      console.log(`PayOnSite mode for ${game.id}. Make free booking`);
+    }
+
+    let players = await engines.sqlite.getPlayers(game.id);
     let freeSlots = game.maxPlayers - players.length;
 
     let [firstName, surName] = req.params.name.split(' ');
@@ -103,6 +111,9 @@ app.get('/api/game/book/:gameId/:name/:phone/:code?', async function (req, res) 
     if(playerBookings.length > 0) {
       console.log('CONTINUE booking process with existing booking', firstName, surName);
       player = playerBookings[0];
+      if (player.payed !== bookPayed) {
+        await engines.sqlite.updatePlayer(game.id, { id: player.id, payed: bookPayed });
+      }
     } else {
       if (players.length >= game.maxPlayers) {
         res.send(
@@ -111,11 +122,10 @@ app.get('/api/game/book/:gameId/:name/:phone/:code?', async function (req, res) 
       }
 
       console.log('MAKE booking', firstName, surName, tel);
-      player = await engine.addPlayer(game.id, {
+      player = await engines.sqlite.addPlayer(game.id, {
         firstName: firstName,
         surName: surName,
         tel: tel,
-        sum: game.priceBookEngine,
         payed: bookPayed,
         sum: 0,
       });
@@ -140,7 +150,7 @@ app.get('/api/game/book/:gameId/:name/:phone/:code?', async function (req, res) 
       bot.send('channel', `${player.firstName} ${player.surName} записался на игру ${game.date}\r\nСвободных мест: ${freeSlots}, запись на basket.msk.ru`);
     } else {
       bot.send('owner', `Book ok: ${game.id}/${player.id} ${player.firstName} ${player.surName} ${tel} slots: ${freeSlots}`);
-      autoCancelation.add(game.id, player, engine.deletePlayer);
+      autoCancelation.add(game.id, player, engines.sqlite.deletePlayer);
     }
     console.log(`BOOK OK game ${game.id} - ${player.id} ${player.firstName} ${player.surName} ${tel}`);
   } catch(e) {
@@ -165,14 +175,13 @@ app.post('/api/game/payment/complete', async function (req, res) {
     }
 
     let [gameId, playerId] = req.body.label.split('|');
-    let game = await utils.findGame(gameId);
+    let game = await engines.sqlite.getGame(gameId);
     if (!game) {
       printError(`Can not find game with id: ${gameId}, ${amount} руб.`);
       return;
     }
-    let engine = engines[game.engine];
 
-    let players = await engine.getPlayers(gameId);
+    let players = await engines.sqlite.getPlayers(gameId);
     let playerBookings = players.filter(p => p.id == playerId && !p.payed);
 
     if(playerBookings.length == 0) {
@@ -181,11 +190,11 @@ app.post('/api/game/payment/complete', async function (req, res) {
     }
     let player = playerBookings[0];
 
-    let ok = await engine.updatePlayer({
+    let ok = await engines.sqlite.updatePlayer(game.id, {
       id: player.id,
       sum: game.priceBookEngine || Math.floor(Number(amount)),
       payed: true
-    }, game.id);
+    });
 
     if(!ok){
       printError(`Cannot update player email ${gameId}/${playerId}`, players);
@@ -215,7 +224,7 @@ smtpEvents.addHandler(async (data) => {
     printError('Some shit with mail event');
     return;
   }
-  let game = await utils.findGame(bookInfo.gameId);
+  let game = await engines.sqlite.getGame(bookInfo.gameId);
   if (!game) {
     printError('Some shit with game/mailer settings', game);
     return;

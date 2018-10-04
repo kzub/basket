@@ -69,6 +69,13 @@ function setGameInfo(game) {
 	$(`#pay-amount-value`).val(price);
 	$(`#pay-game-info-date`).text(game.date);
 	$(`#pay-game-info-time`).text(`(${game.time})`);
+	if (game.payOnSite) {
+		$('#pay-amount-card-title').hide();
+		$('#paybutton').text('Оплата на площадке');
+	} else {
+		$('#pay-amount-card-title').show();
+		$('#paybutton').text('Оплатить');
+	}
 }
 
 function showMessageNoFreeSlots(id, yes) {
@@ -156,6 +163,7 @@ window.onload = () => {
 		}
 	});
 
+	restoreUserInputOnPay();
 	// Pay click
 	$('#paybutton').on('click', el => {
 		if (!validatePlayerFIO()) {
@@ -169,6 +177,8 @@ window.onload = () => {
 
 		let name = getPlayerFIO();
 		let phone = getPlayerPhone();
+		storeUserInputOnPay(name, phone);
+
 		let code = document.location.search.replace(/(\?|&|\/|\s)/g, '');
 		getServerData(`${urlBookSlot}/${model.selectedGame}/${name}/${phone}/${code}`, {}, result => {
 			if (result.success && isFinite(result.gameId) && isFinite(result.playerId)) {
@@ -246,6 +256,21 @@ function validatePlayerPhone() {
 		return;
 	}
 	return true;
+}
+
+function storeUserInputOnPay(name, phone) {
+	localStorage.fio = name;
+	localStorage.phone = phone;
+}
+
+function restoreUserInputOnPay() {
+	if (localStorage.fio) {
+		$('#custom-fio').val(localStorage.fio);
+	}
+
+	if (localStorage.phone) {
+		$('#custom-phone').val(localStorage.phone);
+	}
 }
 
 function showErrorMessage(msg) {

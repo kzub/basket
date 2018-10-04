@@ -86,6 +86,35 @@
 						</div>
 					</div>
 
+					<div game="2" class="item game-item hidden">
+						<div class="card card-header">
+							<a game="2" class="players-head" data-toggle="collapse" data-parent="#dateAccordion" href="#players2">
+								<div class="flex-container">
+									<div>
+										<h4 game="2" class="gameDate">Загружается...</h4>
+										<span game="2" class="gameTime"></span>
+									</div>
+									<h4 game="2" class="slotsUsed"></h4>
+								</div>
+							</a>
+						</div>
+						<div game="2" id="players2" class="players collapse">
+							<div game="2" class="players-list card-body">
+								<h5 game="2" class="noSlotsMessage card-title">Свободных мест нет</h5>
+								<a href="#" game="2" slot="0" class="btn-player btn disabled">-</a>
+								<a href="#" game="2" slot="1" class="btn-player btn disabled">-</a>
+								<a href="#" game="2" slot="2" class="btn-player btn disabled">-</a>
+								<a href="#" game="2" slot="3" class="btn-player btn disabled">-</a>
+								<a href="#" game="2" slot="4" class="btn-player btn disabled">-</a>
+								<a href="#" game="2" slot="5" class="btn-player btn disabled">-</a>
+								<a href="#" game="2" slot="6" class="btn-player btn disabled">-</a>
+								<a href="#" game="2" slot="7" class="btn-player btn disabled">-</a>
+								<a href="#" game="2" slot="8" class="btn-player btn disabled">-</a>
+								<a href="#" game="2" slot="9" class="btn-player btn disabled">-</a>
+							</div>
+						</div>
+					</div>
+
 					<div class="item">
 						<div class="card card-header">
 							<a id="pay-btn" class="pay-head" data-toggle="collapse" data-parent="#dateAccordion">
@@ -114,7 +143,7 @@
 									<input id="pay-amount-value" type="hidden" name="sum" value="0" data-type="number">
 									<input id="orderlabel" type="hidden" name="label" value="0">
 									<input id="successURL" type="hidden" name="successURL" value="">
-									<h5 class="card-title">
+									<h5 id="pay-amount-card-title" class="card-title">
 										<span id="pay-amount-title">-</span> рублей
 									</h5>
 									<a id="paybutton" href="#" class="btn btn-primary">Оплатить</a>
