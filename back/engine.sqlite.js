@@ -92,22 +92,37 @@ exports.updatePlayer = async (gameId, player) => {
   return changes;
 };
 
-exports.getGames = async () => {
+exports.getGames = async (doNotMap = false) => {
   const today = new Date();
   today.setSeconds(0);
   today.setMinutes(0);
   today.setHours(0);
 
-  let games = await dbSelect(`SELECT g.id as gameId, * FROM games g LEFT JOIN places p ON g.id = p.id ` +
-    `WHERE date > ${today.valueOf()} ORDER BY date DESC`);
+  let games = await dbSelect('SELECT g.id as gameId, * FROM games g LEFT JOIN places p ON g.id = p.id ' +
+    `WHERE date > ${today.valueOf()} ORDER BY date ASC`);
 
-  return games.map(game => gameMapper(game));;
+  if (doNotMap) {
+    return games;
+  }
+  return games.map(game => gameMapper(game));
 };
 
 exports.getGame = async (id) => {
-  let [game] = await dbSelect(`SELECT g.id as gameId, * FROM games g LEFT JOIN places p ON g.id = p.id ` +
-    `WHERE g.id = ${id} ORDER BY date DESC`);
+  let [game] = await dbSelect('SELECT g.id as gameId, * FROM games g LEFT JOIN places p ON g.id = p.id ' +
+    `WHERE g.id = ${id} ORDER BY date ASC`);
   return gameMapper(game);
+};
+
+
+exports.insertGame = async (placeId, maxPlayers, price, date, time, props) => {
+  if (typeof props === 'object') {
+    props = JSON.stringify(props);
+  }
+  const query = 'INSERT INTO games (placeId, maxPlayers, price, date, time, props) ' +
+    `VALUES(${placeId}, ${maxPlayers}, ${price}, ${date}, '${time}', '${props}')`;
+
+  let { lastID } = await dbExec(query);
+  return lastID;
 };
 
 function gameMapper(game) {

@@ -3,7 +3,7 @@ const bodyParser = require('body-parser');
 const bot = require('./telegram_bot');
 const utils = require('./utils');
 const config = utils.getConfig();
-const smtpEvents = require('./smtp_server');
+// const smtpEvents = require('./smtp_server');
 
 const app = express();
 app.use(bodyParser.json()); // support json encoded bodies
@@ -212,28 +212,56 @@ app.post('/api/game/payment/complete', async function (req, res) {
   }
 });
 
+// ADMIN
+// ------------------------------------------------
+app.get('/api/game/list', async function (req, res) {
+  try {
+    let games = await engines.sqlite.getGames();
+    res.send(games);
+  } catch(e) {
+    res.status(500).send(
+      makeError('/api/game/list', req, e));
+  }
+});
+
+app.get('/api/game/copyLast', async function (req, res) {
+  try {
+    const games = await engines.sqlite.getGames(true);
+    const lastGame = games.pop();
+    const { placeId, maxPlayers, price, date, time, props } = lastGame;
+    let newDate = new Date(date + 7*24*60*60*1000).valueOf();
+
+    const gameId = await engines.sqlite.insertGame(placeId, maxPlayers, price, newDate, time, props);
+    console.log(`INSERT game: ${gameId}`);
+    res.redirect('/');
+  } catch(e) {
+    res.status(500).send(
+      makeError('/api/game/list', req.body, e));
+  }
+});
+
 console.log('TODO: проверка денег');
 
 app.listen(config.server.port);
 console.log(`SERVER --- listen on: ${config.server.port}`);
 
 // listen for events new from baskmsk system
-smtpEvents.addHandler(async (data) => {
-  let bookInfo = utils.findBookInfoInMailText(data);
-  if (!bookInfo) {
-    printError('Some shit with mail event');
-    return;
-  }
-  let game = await engines.sqlite.getGame(bookInfo.gameId);
-  if (!game) {
-    printError('Some shit with game/mailer settings', game);
-    return;
-  }
+// smtpEvents.addHandler(async (data) => {
+//   let bookInfo = utils.findBookInfoInMailText(data);
+//   if (!bookInfo) {
+//     printError('Some shit with mail event');
+//     return;
+//   }
+//   let game = await engines.sqlite.getGame(bookInfo.gameId);
+//   if (!game) {
+//     printError('Some shit with game/mailer settings', game);
+//     return;
+//   }
 
-  let players = await engines.basketmsk.getPlayers(game.id);
-  let freeSlots = game.maxPlayers - players.length;
-  bot.send('channel', `${bookInfo.name} записался на игру ${game.date}\r\nСвободных мест: ${freeSlots}, запись на basket.msk.ru`);
-});
+//   let players = await engines.basketmsk.getPlayers(game.id);
+//   let freeSlots = game.maxPlayers - players.length;
+//   bot.send('channel', `${bookInfo.name} записался на игру ${game.date}\r\nСвободных мест: ${freeSlots}, запись на basket.msk.ru`);
+// });
 
 function makeError(msg) {
   printError.apply(this, arguments);

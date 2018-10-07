@@ -93,7 +93,11 @@ function updatePlayersList(n) {
 		}
 
 		hideAllGames();
+		let maxGames = 3;
 		for (let id in data.games) {
+			if (0 === maxGames--) {
+				break;
+			}
 			enableGame(id);
 			fillPlayerNames(id, data.games[id].slots);
 			fillGameDateTime(id, data.games[id].date, data.games[id].time);

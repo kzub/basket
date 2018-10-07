@@ -1,6 +1,6 @@
 const bot = require('./telegram_bot');
 const routines = {};
-const timeout = 15*60*1000;
+const timeout = 30*60*1000;
 
 function makeId(gameId, playerId) {
 	return [gameId, playerId].join(':');
