@@ -238,6 +238,7 @@ app.post('/api/game/copyGame', async function (req, res) {
   try {
     const games = await engines.sqlite.getGames(true, true);
     const gameId = Number(req.body.gameId);
+    const newDate = new Date(req.body.gameDate);
 
     const game = games.filter(g => g.id === gameId)[0];
     if (!game) {
@@ -246,10 +247,9 @@ app.post('/api/game/copyGame', async function (req, res) {
       return
     }
 
-    const { placeId, maxPlayers, price, date, time, props } = game;
-    let newDate = new Date(date + 7*24*60*60*1000).valueOf();
+    const { placeId, maxPlayers, price, time, props } = game;
 
-    const newGameId = await engines.sqlite.insertGame(game.place.id, maxPlayers, price, newDate, time, props);
+    const newGameId = await engines.sqlite.insertGame(game.place.id, maxPlayers, price, newDate.valueOf(), time, props);
     console.log(`COPY GAME: ${gameId} -> ${newGameId}`);
     res.redirect('/');
   } catch(e) {
