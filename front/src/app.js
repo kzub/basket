@@ -96,7 +96,8 @@ function showMessageNoFreeSlots(id, yes) {
 }
 
 function updatePlayersList(n) {
-	getServerData(urlGetSlots, {}, data => {
+	let code = document.location.search.replace(/(\?|&|\/|\s)/g, '');
+	getServerData(`${urlGetSlots}/${code}`, {}, data => {
 		for(let k in data){
 			model[k] = data[k];
 		}
@@ -214,7 +215,9 @@ window.onload = () => {
 				target.val([target.val(), result.gameId, result.playerId, name].join(' '));
 
 				if(result.payed){
-					showMessage('Информация', 'Запись произведена!');
+					showMessage('Информация', 'Запись произведена!', function() {
+						location.reload();
+					});
 				} else {
 					$('#submitform').submit();
 				}
@@ -310,9 +313,7 @@ function showMessage(title, msg, callback) {
 
 	if (callback) {
 		$('#modal-window').on('hidden.bs.modal', function (e) {
-	  	if (callback) {
-	  		callback();
-	  	}
+			callback();
 		});
 	}
 }

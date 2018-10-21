@@ -19,19 +19,24 @@ app.get('/', function (req, res) {
   res.status(404).send('Not Found\n');
 });
 
-app.get('/api/game/slots', async function (req, res) {
+app.get('/api/game/slots/:code?', async function (req, res) {
   try {
-    console.log('GAME GET SLOTS ->');
+    console.log(`GAME GET SLOTS -> (${req.params.code || '-'})`);
     let games = await engines.sqlite.getGames();
     let result = [];
 
     for (let game of games) {
       let slots = await getGameSlots(game);
+      let price = game.price;
+      if (isFinite(game.props.netPrice) && req.params.code && config.admin.netPrice
+        && (req.params.code === config.admin.netPrice)) {
+        price = Number(game.props.netPrice);
+      }
       result.push({
         gameId: game.id,
         date: game.date,
         time: game.time,
-        price: game.price,
+        price: price,
         place: {
           metro: game.place.metro,
           name: game.place.name,
@@ -218,7 +223,10 @@ app.post('/api/game/payment/complete', async function (req, res) {
 // ------------------------------------------------
 app.get('/api/game/list', async function (req, res) {
   try {
-    let games = await engines.sqlite.getGames();
+    let games = await engines.sqlite.getGames(true, true);
+    games.forEach(game => {
+      game.date = utils.getBeautifulDate(game.date);
+    });
     res.send(games);
   } catch(e) {
     res.status(500).send(
@@ -226,15 +234,23 @@ app.get('/api/game/list', async function (req, res) {
   }
 });
 
-app.get('/api/game/copyLast', async function (req, res) {
+app.post('/api/game/copyGame', async function (req, res) {
   try {
-    const games = await engines.sqlite.getGames(true);
-    const lastGame = games.pop();
-    const { placeId, maxPlayers, price, date, time, props } = lastGame;
+    const games = await engines.sqlite.getGames(true, true);
+    const gameId = Number(req.body.gameId);
+
+    const game = games.filter(g => g.id === gameId)[0];
+    if (!game) {
+      console.log(`Game ${gameId} not found`);
+      res.redirect('/zkadmin.html');
+      return
+    }
+
+    const { placeId, maxPlayers, price, date, time, props } = game;
     let newDate = new Date(date + 7*24*60*60*1000).valueOf();
 
-    const gameId = await engines.sqlite.insertGame(placeId, maxPlayers, price, newDate, time, props);
-    console.log(`INSERT game: ${gameId}`);
+    const newGameId = await engines.sqlite.insertGame(game.place.id, maxPlayers, price, newDate, time, props);
+    console.log(`COPY GAME: ${gameId} -> ${newGameId}`);
     res.redirect('/');
   } catch(e) {
     res.status(500).send(

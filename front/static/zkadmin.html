@@ -21,40 +21,46 @@
 		<div class="card-body">
 
 			<div id="main">
-				<div id="dateAccordion" data-children=".item">
-
+				<div id="gameAccordion" data-children=".item">
+					<div id="gamesList"></div>
 					<div class="item">
 						<div id="pay" class="collapse show" role="tabpanel">
-							<div class="card-body">
-								<a href="/api/game/copyLast"><button type="submit" id="paybutton" class="btn btn-primary">Скопировать последнюю</button></a>
-
-								<!-- <form id="submitform" method="POST" action="https://money.yandex.ru/quickpay/confirm.xml">
-									<div class="form-group">
-										<input type="text" class="form-control" name="label" aria-describedby="nameHelp"
-										placeholder="Фамилия и Имя" required>
-										<small id="nameHelp" class="form-text text-muted">От кого перевод</small>
-									</div>
-									<input type="hidden" name="receiver" value="410015876343196">
-									<input type="hidden" name="quickpay-form" value="donate">
-									<input id="ordertarget" type="hidden" name="targets" value="Оплата баскетбольной площадки ">
-									<input type="hidden" name="paymentType" value="AC">
-
-									<div class="form-group">
-										<input id="pay-amount-value" class="form-control" type="number" name="sum"  data-type="number" aria-describedby="payHelp" placeholder="Cумма перевода" required>
-										<small id="payHelp" class="form-text text-muted">рублей</small>
-									</div>
-
-									<input id="successURL" type="hidden" name="successURL" value="http://basket.msk.ru/success.html">
-
-									<button type="submit" id="paybutton" class="btn btn-primary">Оплатить</button>
-								</form> -->
-							</div>
+							<form id="submitform" method="POST" action="/api/game/copyGame">
+								<div class="card-body">
+									<input type="number" class="form-control" name="gameId" aria-describedby="nameHelp"
+										placeholder="номер игры" required>
+										<small id="nameHelp" class="form-text text-muted mb-2">дублировать игру на неделю вперед</small>
+									<button type="submit" id="paybutton" class="btn btn-primary">Дублировать</button>
+								</div>
+							</form>
 						</div>
 					</div>
 				</div>
 			</div>
 		</div>
 	</div>
+
+	<script type="text/javascript">
+
+		fetch('/api/game/list', {}).then(function(response) {
+			if(response.ok) {
+				response.json().then(function(data) {
+					console.log(data)
+					data.forEach(game => {
+						addGame(`${game.id} - ${game.time} ${game.date}`);
+					})
+				}).catch(function(error) {
+					console.log('json parse error: ' + error.message);
+				});
+			}
+		});
+
+		function addGame(text) {
+			$('#gamesList').append(`<div class="alert alert-secondary" role="alert">${text}</div>`);
+		}
+
+
+	</script>
 
 </body>
 </html>
