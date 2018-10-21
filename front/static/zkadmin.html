@@ -20,43 +20,65 @@
 		<h4 class="p-3 mb-2 bg-dark text-white"><center>Управление</center></h4>
 		<div class="card-body">
 
-			<div id="main">
-				<div id="gameAccordion" data-children=".item">
-					<div id="gamesList"></div>
-					<div class="item">
-						<div id="pay" class="collapse show" role="tabpanel">
-							<form id="submitform" method="POST" action="/api/game/copyGame">
-								<div class="card-body">
-									<input type="number" class="form-control" name="gameId" aria-describedby="nameHelp"
-										placeholder="номер игры" required>
-										<small id="nameHelp" class="form-text text-muted mb-2">дублировать игру</small>
-									<input type="date" class="form-control" name="gameDate" aria-describedby="nameHelp"
-										placeholder="дата игры" required>
-										<small id="nameHelp" class="form-text text-muted mb-2">новая дата игры</small>
-									<button type="submit" id="paybutton" class="btn btn-primary">Дублировать</button>
-								</div>
-							</form>
-						</div>
+			<div id="gamesList"></div>
+
+			<hr>
+			<div class="card">
+			  <div class="card-header">Копирование игры</div>
+				<form id="submitform" method="POST" action="/api/game/copyGame">
+					<div class="card-body">
+						<input class="password" type="hidden" name="password" value="">
+						<input type="number" class="form-control" name="gameId" aria-describedby="nameHelp"
+							placeholder="" required>
+							<small id="nameHelp" class="form-text text-muted mb-2">номер игры</small>
+						<input type="date" class="form-control" name="gameDate" aria-describedby="nameHelp"
+							placeholder="" required>
+							<small id="nameHelp" class="form-text text-muted mb-2">новая дата игры</small>
+						<button type="submit" id="paybutton" class="btn btn-primary">Дублировать</button>
 					</div>
-				</div>
+				</form>
 			</div>
+
+			<hr>
+			<div class="card">
+			  <div class="card-header">Включение/Выключение игры</div>
+				<form id="submitform" method="POST" action="/api/game/enableGame">
+					<div class="card-body">
+						<input class="password" type="hidden" name="password" value="">
+						<input type="number" class="form-control" name="gameId" aria-describedby="nameHelp"
+							placeholder="" required>
+							<small id="nameHelp" class="form-text text-muted mb-2">номер игры</small>
+						<input type="number" class="form-control" name="gameStatus" aria-describedby="enableHelp"
+							placeholder="" required>
+							<small id="enableHelp" class="form-text text-muted mb-2">включить - 1, отключить - 0</small>
+						<button type="submit" id="paybutton" class="btn btn-primary">Изменить</button>
+					</div>
+				</form>
+			</div>
+
 		</div>
 	</div>
 
 	<script type="text/javascript">
+		window.onload = function() {
+			let code = document.location.search.replace(/(\?|&|\/|\s)/g, '');
+			let pwdFields = $('.password')
+			pwdFields.each(function(id){
+				pwdFields[id].value = code;
+			});
 
-		fetch('/api/game/list', {}).then(function(response) {
-			if(response.ok) {
-				response.json().then(function(data) {
-					console.log(data)
-					data.forEach(game => {
-						addGame(`${game.id} - ${game.time} ${game.date}`);
-					})
-				}).catch(function(error) {
-					console.log('json parse error: ' + error.message);
-				});
-			}
-		});
+			fetch('/api/game/list/' + code, {}).then(function(response) {
+				if(response.ok) {
+					response.json().then(function(data) {
+						data.forEach(game => {
+							addGame(`${game.id} [${game.enabled ? '+':'-'}] ${game.time} ${game.date}`);
+						})
+					}).catch(function(error) {
+						console.log('json parse error: ' + error.message);
+					});
+				}
+			});
+		}
 
 		function addGame(text) {
 			$('#gamesList').append(`<div class="alert alert-secondary" role="alert">${text}</div>`);

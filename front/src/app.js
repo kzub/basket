@@ -80,7 +80,7 @@ function setGameInfo(game) {
 
 	if (game.payOnSite) {
 		$('#pay-amount-card-title').hide();
-		$('#paybutton').text('Оплата на площадке');
+		$('#paybutton').text('Записаться');
 	} else {
 		$('#pay-amount-card-title').show();
 		$('#paybutton').text('Оплатить');
@@ -103,7 +103,7 @@ function updatePlayersList(n) {
 		}
 
 		hideAllGames();
-		let maxGames = 3;
+		let maxGames = 8;
 		for (let id in data.games) {
 			if (0 === maxGames--) {
 				break;

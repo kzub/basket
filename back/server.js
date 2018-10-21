@@ -21,15 +21,17 @@ app.get('/', function (req, res) {
 
 app.get('/api/game/slots/:code?', async function (req, res) {
   try {
-    console.log(`GAME GET SLOTS -> (${req.params.code || '-'})`);
-    let games = await engines.sqlite.getGames();
+    const code = req.params.code;
+    const isAdmin = code === config.admin.password;
+    let games = await engines.sqlite.getGames(false, false, !isAdmin);
     let result = [];
+    console.log(`GAME GET SLOTS -> (${code || '-'})`);
 
     for (let game of games) {
       let slots = await getGameSlots(game);
       let price = game.price;
-      if (isFinite(game.props.netPrice) && req.params.code && config.admin.netPrice
-        && (req.params.code === config.admin.netPrice)) {
+      if (code && isFinite(game.props.netPrice) && config.admin.netPrice
+        && (code === config.admin.netPrice)) {
         price = Number(game.props.netPrice);
       }
       result.push({
@@ -154,7 +156,10 @@ app.get('/api/game/book/:gameId/:name/:phone/:code?', async function (req, res) 
 
     if (bookPayed) {
       bot.send('owner', `Pay ok: [No Money] ${game.id}/${player.id} ${player.firstName} ${player.surName} ${tel} slots: ${freeSlots}`);
-      bot.send('channel', `${player.firstName} ${player.surName} записался на игру ${game.date}\r\nСвободных мест: ${freeSlots}, запись на basket.msk.ru`);
+      if (game.enabled) {
+        bot.send('channel', `${player.firstName} ${player.surName} записался на игру ${game.date}\r\nСвободных мест: ${freeSlots}, запись на basket.msk.ru`);
+      }
+      autoCancelation.del(game.id, player);
     } else {
       bot.send('owner', `Book ok: ${game.id}/${player.id} ${player.firstName} ${player.surName} ${tel} slots: ${freeSlots}`);
       autoCancelation.add(game.id, player, engines.sqlite.deletePlayer);
@@ -210,7 +215,9 @@ app.post('/api/game/payment/complete', async function (req, res) {
 
     let freeSlots = game.maxPlayers - players.length;
     bot.send('owner', `Pay ok: ${game.id}/${player.id} ${player.firstName} ${player.surName} ${amount} руб.`);
-    bot.send('channel', `${player.firstName} ${player.surName} записался на игру ${game.date}\r\nСвободных мест: ${freeSlots}, запись на basket.msk.ru`);
+    if (game.enabled) {
+      bot.send('channel', `${player.firstName} ${player.surName} записался на игру ${game.date}\r\nСвободных мест: ${freeSlots}, запись на basket.msk.ru`);
+    }
     autoCancelation.del(game.id, player);
     console.log('OK', playerId, player.firstName, player.surName, amount);
   } catch(e) {
@@ -221,37 +228,68 @@ app.post('/api/game/payment/complete', async function (req, res) {
 
 // ADMIN
 // ------------------------------------------------
-app.get('/api/game/list', async function (req, res) {
+app.get('/api/game/list/:code?', async function (req, res) {
   try {
-    let games = await engines.sqlite.getGames(true, true);
+    if (req.params.code !== config.admin.password) {
+      throw 'unauthorized access';
+    }
+    let games = await engines.sqlite.getGames(true, true, false);
     games.forEach(game => {
       game.date = utils.getBeautifulDate(game.date);
     });
     res.send(games);
   } catch(e) {
     res.status(500).send(
-      makeError('/api/game/list', req, e));
+      makeError('/api/game/list', req.params.code, e));
   }
 });
 
 app.post('/api/game/copyGame', async function (req, res) {
   try {
-    const games = await engines.sqlite.getGames(true, true);
+    if (req.body.password !== config.admin.password) {
+      throw 'unauthorized access';
+    }
+    const games = await engines.sqlite.getGames(true, true, false);
     const gameId = Number(req.body.gameId);
     const newDate = new Date(req.body.gameDate);
 
     const game = games.filter(g => g.id === gameId)[0];
     if (!game) {
-      console.log(`Game ${gameId} not found`);
-      res.redirect('/zkadmin.html');
-      return
+      console.log(`copyGame: Game ${gameId} not found`);
+      res.redirect('/zkadmin.html?' + req.body.password);
+      return;
     }
 
-    const { placeId, maxPlayers, price, time, props } = game;
+    const { maxPlayers, price, time, props } = game;
 
     const newGameId = await engines.sqlite.insertGame(game.place.id, maxPlayers, price, newDate.valueOf(), time, props);
     console.log(`COPY GAME: ${gameId} -> ${newGameId}`);
-    res.redirect('/');
+    res.redirect('/zkadmin.html?' + req.body.password);
+  } catch(e) {
+    res.status(500).send(
+      makeError('/api/game/list', req.body, e));
+  }
+});
+
+app.post('/api/game/enableGame', async function (req, res) {
+  try {
+    if (req.body.password !== config.admin.password) {
+      throw 'unauthorized access';
+    }
+    const games = await engines.sqlite.getGames(true, true, false);
+    const gameId = Number(req.body.gameId);
+    const newStatus = req.body.gameStatus;
+
+    const game = games.filter(g => g.id === gameId)[0];
+    if (!game) {
+      console.log(`enableGame: Game ${gameId} not found`);
+      res.redirect('/zkadmin.html?' + req.body.password);
+      return;
+    }
+
+    await engines.sqlite.toggleGame(gameId, newStatus);
+    console.log(`ENABLE GAME: ${gameId} -> ${newStatus}`);
+    res.redirect('/zkadmin.html?' + req.body.password);
   } catch(e) {
     res.status(500).send(
       makeError('/api/game/list', req.body, e));
