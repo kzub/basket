@@ -42,6 +42,13 @@
 						</div>
 						<div game="0" id="players0" class="players collapse">
 							<div game="0" class="card-body players-list">
+								<div game="0" class="game-pl-organizer card bg-light mb-3">
+									<div class="card-header">Организатор</div>
+									<div class="card-body">
+										<h6 game="0" class="game-pl-org-name card-title"></h6>
+										<p game="0" class="game-pl-org-phone card-text"></p>
+									</div>
+								</div>
 								<h5 game="0" class="noSlotsMessage card-title">Свободных мест нет</h5>
 								<a href="#" game="0" slot="0" class="btn-player btn disabled">-</a>
 								<a href="#" game="0" slot="1" class="btn-player btn disabled">-</a>
@@ -71,6 +78,13 @@
 						</div>
 						<div game="1" id="players1" class="players collapse">
 							<div game="1" class="players-list card-body">
+								<div game="1" class="game-pl-organizer card bg-light mb-3">
+									<div class="card-header">Организатор</div>
+									<div class="card-body">
+										<h6 game="1" class="game-pl-org-name card-title"></h6>
+										<p game="1" class="game-pl-org-phone card-text"></p>
+									</div>
+								</div>
 								<h5 game="1" class="noSlotsMessage card-title">Свободных мест нет</h5>
 								<a href="#" game="1" slot="0" class="btn-player btn disabled">-</a>
 								<a href="#" game="1" slot="1" class="btn-player btn disabled">-</a>
@@ -100,6 +114,13 @@
 						</div>
 						<div game="2" id="players2" class="players collapse">
 							<div game="2" class="players-list card-body">
+								<div game="2" class="game-pl-organizer card bg-light mb-3">
+									<div class="card-header">Организатор</div>
+									<div class="card-body">
+										<h6 game="2" class="game-pl-org-name card-title"></h6>
+										<p game="2" class="game-pl-org-phone card-text"></p>
+									</div>
+								</div>
 								<h5 game="2" class="noSlotsMessage card-title">Свободных мест нет</h5>
 								<a href="#" game="2" slot="0" class="btn-player btn disabled">-</a>
 								<a href="#" game="2" slot="1" class="btn-player btn disabled">-</a>
@@ -124,7 +145,8 @@
 						<div id="pay" class="collapse" role="tabpanel">
 							<div class="card-body">
 								<h4 class="card-text" id="pay-game-info-date"></h4>
-								<h6 class="card-text" id="pay-game-info-time"></h6>
+								<h6 class="card-text mb-3" id="pay-game-info-time"></h6>
+
 								<form id="submitform" method="POST" action="https://money.yandex.ru/quickpay/confirm.xml">
 									<div class="form-group">
 										<input type="text" class="form-control" id="custom-fio" aria-describedby="emailHelp"
@@ -146,7 +168,14 @@
 									<h5 id="pay-amount-card-title" class="card-title">
 										<span id="pay-amount-title">-</span> рублей
 									</h5>
-									<a id="paybutton" href="#" class="btn btn-primary">Оплатить</a>
+									<div id="pay-game-organizer" class="card bg-light mb-4">
+									  <div class="card-header">Организатор</div>
+									  <div class="card-body">
+									    <h6 class="card-title" id="pay-game-org-name"></h6>
+									    <p class="card-text" id="pay-game-org-phone"></p>
+									  </div>
+									</div>
+									<a id="paybutton" href="#" class="btn btn-primary mb-4">Оплатить</a>
 								</form>
 							</div>
 						</div>

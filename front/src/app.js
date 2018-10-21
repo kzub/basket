@@ -65,10 +65,19 @@ function fillPlayerNames(id, slots) {
 function setGameInfo(game) {
 	model.selectedGame = game.gameId;
 	let price = isFinite(game.price) ? game.price : 0;
-	$(`#pay-amount-title`).text(price);
-	$(`#pay-amount-value`).val(price);
-	$(`#pay-game-info-date`).text(game.date);
-	$(`#pay-game-info-time`).text(`(${game.time})`);
+	$('#pay-amount-title').text(price);
+	$('#pay-amount-value').val(price);
+	$('#pay-game-info-date').text(game.date);
+	$('#pay-game-info-time').text(game.time);
+
+	if (game.organizer) {
+		$('#pay-game-org-name').text(game.organizer);
+		$('#pay-game-org-phone').text(game.organizerPhone);
+		$('#pay-game-organizer').show();
+	} else {
+		$('#pay-game-organizer').hide();
+	}
+
 	if (game.payOnSite) {
 		$('#pay-amount-card-title').hide();
 		$('#paybutton').text('Оплата на площадке');
@@ -99,6 +108,7 @@ function updatePlayersList(n) {
 				break;
 			}
 			enableGame(id);
+			setGameOrganizer(id, data.games[id]);
 			fillPlayerNames(id, data.games[id].slots);
 			fillGameDateTime(id, data.games[id].date, data.games[id].time);
 			fillUsedSlots(id, data.games[id].slots);
@@ -129,6 +139,16 @@ function hideAllGames() {
 
 function enableGame(id) {
 	$(`[game*=${id}].game-item`).removeClass('hidden')
+}
+
+function setGameOrganizer(id, game) {
+	if (game.organizer) {
+		$(`[game*=${id}].game-pl-organizer`).removeClass('hidden');
+		$(`[game*=${id}].game-pl-org-name`).text(game.organizer);
+		$(`[game*=${id}].game-pl-org-phone`).text(game.organizerPhone);
+	} else {
+		$(`[game*=${id}].game-pl-organizer`).addClass('hidden');
+	}
 }
 
 window.onload = () => {

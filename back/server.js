@@ -39,6 +39,8 @@ app.get('/api/game/slots', async function (req, res) {
         },
         slots: slots,
         payOnSite: Boolean(game.props.payOnSite),
+        organizer: game.props.organizer && String(game.props.organizer),
+        organizerPhone: game.props.organizerPhone && String(game.props.organizerPhone),
       });
       let playersCount = slots.filter(s => s.status !== 'free').length;
       console.log(`OK game ${game.id} - ${playersCount}/${slots.length}`);
