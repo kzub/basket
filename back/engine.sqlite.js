@@ -97,13 +97,14 @@ exports.getGames = async (showLastMonth = false, rawData = false, hideDisabled =
   today.setSeconds(0);
   today.setMinutes(0);
   today.setHours(0);
+  today.setMilliseconds(0);
 
   if (showLastMonth) {
     today.setDate(-30);
   }
 
   let games = await dbSelect('SELECT g.id as gid, p.id as placeId, * FROM games g LEFT JOIN places p ON g.placeId = p.id ' +
-    `WHERE date > ${today.valueOf()} ORDER BY date ASC`);
+    `WHERE date >= ${today.valueOf()} ORDER BY date ASC`);
 
   if (hideDisabled) {
     games = games.filter(g => g.enabled);
