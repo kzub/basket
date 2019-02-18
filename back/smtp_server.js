@@ -60,7 +60,7 @@ const server = net.createServer((c) => {
     data += line;
     console.log(`SMTP <<< ${line}`);
     let [cmd] = line.split(/\r\n|\s/);
-    let res;
+
     if (cmd == 'DATA') {
       write('354 ready');
     }

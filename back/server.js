@@ -297,6 +297,9 @@ app.post('/api/game/enableGame', async function (req, res) {
 });
 
 console.log('TODO: проверка денег');
+console.log('TODO: список замен');
+// удаление себя из записавшихся без денег
+// переключение в режим можно платить
 
 app.listen(config.server.port);
 console.log(`SERVER --- listen on: ${config.server.port}`);
