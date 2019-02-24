@@ -16,6 +16,7 @@ import Main from './components/Main.vue'
 import Admin from './components/Admin.vue'
 import Profile from './components/Profile.vue'
 import Pay from './components/Pay.vue'
+import Reservation from './components/Reservation.vue'
 
 const router = new VueRouter({
   routes :[
@@ -23,6 +24,7 @@ const router = new VueRouter({
     { path: '/admin', component: Admin },
     { path: '/profile', component: Profile },
     { path: '/pay', name:'pay', component: Pay },
+    { path: '/reservation', name:'reservation', component: Reservation },
   ],
 })
 
@@ -72,7 +74,7 @@ export default {
 }
 
 .slide-leave-active {
-  position: absolute;
+  position: fixed;
   width: 100%;
 
   transition: left 0.3s, opacity 0.3s;

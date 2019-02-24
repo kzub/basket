@@ -1,7 +1,11 @@
 <template>
   <div class="mb-4">
     <div v-if="!user" class="my-2">
-      <img height=32 width=32 src="https://i.pinimg.com/originals/3e/f0/e6/3ef0e69f3c889c1307330c36a501eb12.gif"/>
+      <div class="d-flex justify-content-center">
+        <div class="spinner-border" role="status">
+          <span class="sr-only">Loading...</span>
+        </div>
+      </div>
     </div>
     <div v-else>
       <router-link to="/profile" tag="div">

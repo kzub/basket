@@ -7,13 +7,13 @@
       <Register/>
     </div>
     <div v-else-if="wantChange" class="my-2">
-      <Register/>
+      <Register :name="user.name" :phone="user.phone"/>
     </div>
     <div v-else>
       <b-card no-body class="mb-1">
-        <!-- <b-card-header header-tag="header" class="p-1" role="tab"> -->
-          <b-btn class="p-2 rounded-0" block href="#" disabled v-b-toggle.regStep2 variant="secondary">Личные данные</b-btn>
-        <!-- </b-card-header> -->
+        <b-btn class="p-2 rounded-0" block href="#" v-b-toggle.regStep2 variant="secondary">
+          Личные данные
+        </b-btn>
         <b-card-body>
           <h5>{{ user.name }}</h5>
           <h5>{{ user.phone }}</h5>

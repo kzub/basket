@@ -3,7 +3,9 @@
     <div role="tablist">
 
       <b-card no-body class="mb-1">
-        <b-btn class="p-2 rounded-0" block href="#" v-b-toggle.regStep1 variant="secondary">Личные данные</b-btn>
+        <b-btn class="p-2 rounded-0" block href="#" v-b-toggle.regStep1 variant="secondary">
+          Личные данные
+        </b-btn>
 
         <b-collapse id="regStep1" visible accordion="reg-accordion" role="tabpanel">
           <b-card-body>
@@ -69,11 +71,12 @@
   export default {
     name: 'Register',
     mixins: [GameUtils],
+    props: ['name', 'phone'],
     data () {
       return {
         form: {
-          phone: '',
-          name: '',
+          phone: this.phone,
+          name: this.name,
           code: '',
         },
       }
@@ -94,7 +97,6 @@
           this.$router.push({
             path: this.mxReturnInfo.retUrl,
             query: {
-              placeId: this.mxReturnInfo.placeId,
               gameId: this.mxReturnInfo.gameId,
               retUrl: '/',
             },

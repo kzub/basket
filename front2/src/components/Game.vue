@@ -1,50 +1,94 @@
 <template>
   <div>
-    <div v-if="!mxAvailableSlots(game.slots)" class="card-title btn-danger rounded my-2 py-2">
+    <div v-if="!mxAvailableSlots(game.slots)" class="card-title btn-danger rounded mt-2 mb-3 py-2">
       Свободных мест нет
     </div>
 
-    <div no-body class="mb-2 text-left pl-2">
-        <div class="d-flex">Организатор: 
-          <div class="pl-1">{{ game.organizer.name }}</div>
-        </div>        
+    <div v-if="isAdmin" class="m-1 p-2 rounded btn-danger">
+      Режим администратора
+    </div>
+
+    <div>
+      <div class="text-left m-2">Список игроков:</div>
+      <div v-for="(slot, index) in game.slots" :key="'p'+index">
+        <div v-if="!isBackupPlayer(slot)">
+          <router-link class="d-flex" :to="goLink(game, slot)" tag="div">
+            <b-button href="#" class="m-1 slot" :variant="bgColors[slot.type]">
+              {{ slot.text }}
+            </b-button>
+            <div v-if="modifyAllowed(game, slot)" class="arrow">
+              <i class="right"></i>
+            </div>
+          </router-link>
+        </div>
+      </div>
+      
+      <div v-if="backupPlayersExist(game)">
+        <hr/>
+        
+        <div class="text-left m-2">Список запасных:</div>
+        <div v-for="(slot, index) in game.slots" :key="'r'+index">
+          <div v-if="isBackupPlayer(slot)">
+            <router-link class="d-flex" :to="goLink(game, slot)" tag="div">
+              <b-button href="#" class="m-1 slot" :variant="bgColors[slot.type]">
+                {{ slot.text }}
+              </b-button>
+              <div v-if="modifyAllowed(game, slot)" class="arrow">
+                <i class="right"></i>
+              </div>
+            </router-link>
+          </div>
+        </div>
+      </div>
+      
+      <hr/>
+      
+      <div no-body class="mb-2 text-left pl-2">
+        <Organizer :name="game.organizer.name" :phone="game.organizer.phone" />
+
         <div v-if="game.payment.type == 'prepay'">
           Стоимость: {{ game.payment.amount }} р.
         </div>
         <div v-else-if="game.payment.type == 'preorder'">
           Стоимость зала: {{ game.payment.amount }} р. <br>
-          Делится на всех до игры
+          Делится на всех <span class="font-weight-bolder font-italic text-danger">до</span> игры
         </div>
         <div v-else-if="game.payment.type == 'postpay'">
           Стоимость зала: {{ game.payment.amount }} р. <br>
-          Делится на всех после игры
+          Делится на всех <span class="font-weight-bolder font-italic text-danger">после</span> игры
         </div>      
-    </div>
+      </div>
 
-    <div v-for="(slot, index) in game.slots" :key="index">
-      <hr v-if="slot.hr"/>
-      <router-link class="d-flex"  v-else :to="goLink(slot, place, game)" tag="div">
-        <b-button href="#" class="m-1 slot" :variant="bgColors[slot.type]">
-            {{ slot.text }}
-            <span v-if="slot.type === 'waitlist'">(запасной)</span>
-        </b-button>
-        <b-button v-if="slot.userId === user.id" href="#" class="m-2" variant="danger">
-          X
-        </b-button>
-      </router-link>
-    </div>
+      <div class="mt-4 mb-5">
+        <b-btn v-b-toggle="'collapsePlace' + game.gameId" variant="outline-primary">
+          Информация о площадке
+        </b-btn>
 
+        <b-collapse :id="'collapsePlace' + game.gameId" class="mt-4">
+            <p class="card-text">{{ game.place.description }}</p>
+            <a :href="'https://www.google.com/maps/search/' + game.place.position +'/'">Координаты входа</a>
+            <b-btn class="mt-2" block href="tg://join?invite=CE3oJA6vM82vZHQXf03yyA" variant="link">
+              Чат площаки
+            </b-btn>
+        </b-collapse>  
+      </div>
+
+    </div>
   </div>
 </template>
 
 <script>
 
 import GameUtils from '../mixins/game.js'
+import Organizer from './Organizer.vue'
 
 export default {
   name: 'Game',
-  props: ['place', 'game'],
+  props: ['game'],
   mixins: [GameUtils],
+  components: {
+    Organizer,
+  },
   data: function() {
     return  {
       bgColors: {
@@ -52,35 +96,66 @@ export default {
         'paid': 'success',
         'reserved': 'warning',
         'waitlist': 'secondary',
-        'empty-backup': 'outline-secondary',
+        'empty-backup': 'secondary',
       },
     }
   },
   computed: {
+    isAdmin () {
+      return this.$store.state.user.userId === this.game.organizer.userId
+    },
     user () {
       return this.$store.state.user
     },
   },
   methods: {
-    goLink (slot, place, game) {
+    modifyAllowed (game, slot) {
       if (slot.type.indexOf('empty') == 0) {
-        // book slot
+        return false
+      }
+      return (this.user.userId == slot.userId) || this.isAdmin
+    },
+    isBackupPlayer (slot) {
+      return ['waitlist', 'empty-backup'].includes(slot.type)
+    },
+    backupPlayersExist (game) {
+      return game.slots.some(s => this.isBackupPlayer(s))
+    },
+    goLink (game, slot) {
+      if (slot.type.indexOf('empty') == 0) {
         if (this.$store.state.user && this.$store.state.user.auth) {
           return {
+            // book slot
             path: '/pay',
-            query: { placeId: place.id, gameId: game.id, slotType: slot.type }
+            query: { gameId: game.gameId, slotType: slot.type }
           }
         }
-        // redirect to auth page
         return {
+          // redirect to auth page
           path: '/profile',
-          query: { retUrl: '/pay', placeId: place.id, gameId: game.id, slotType: slot.type }
+          query: { retUrl: '/pay', gameId: game.gameId, slotType: slot.type }
         }
       }
-      // do nothing
+
+      if (!this.modifyAllowed(game, slot)) {
+        return {
+          // do nothing
+          path: '/',
+          query: { gameId: game.gameId }
+        }
+      }
+
+      if (this.$store.state.user && this.$store.state.user.auth) {
+        return {
+          // book slot
+          path: '/reservation',
+          query: { gameId: game.gameId, rsvId: slot.rsvId }
+        }
+      }
       return {
-        path: '/',
-        query: { placeId: place.id, gameId: game.id }
+        // redirect to auth page
+        path: '/profile',
+        query: { retUrl: '/reservation', gameId: game.gameId, rsvId: slot.rsvId }
       }
     }
   },
@@ -96,6 +171,24 @@ export default {
 }
 .slot {
   width: 100%;
+}
+
+.arrow {
+  position: absolute;
+  margin-left: 85%;
+  margin-top: 9px;
+}
+
+i {
+  border: solid black;
+  border-width: 0 3px 3px 0;
+  display: inline-block;
+  padding: 3px;
+}
+
+.right {
+  transform: rotate(-45deg);
+  -webkit-transform: rotate(-45deg);
 }
 
 </style>
