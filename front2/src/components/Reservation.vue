@@ -16,14 +16,17 @@
       <!-- game and payment info -->
       <GameInfo :game="game"/>
 
-      <b-button class="w-50 mt-2" v-if="reservation.type === 'paid'" variant="success">
+      <b-button class="w-50 mt-2 mb-3" v-if="reservation.type === 'paid'" variant="success">
         ОПЛАЧЕНО
       </b-button>
-      <b-button class="w-50 mt-2" v-else variant="warning">
+      <b-button v-else class="mx-5 mt-2 mb-3 justify-content-center" variant="warning">
         НЕ ОПЛАЧЕНО
+        <div v-if="game.payment.type === 'prepay'" class="btn-danger">
+          (бронь действует до...)
+        </div>
       </b-button>
-      
-      <b-card-body class="mb-4">
+
+      <div class="mb-4 px-3">
         <b-form @submit="onPaySubmit">
           <!-- player details -->
           <div class="text-left">
@@ -46,7 +49,7 @@
                               required
                               disabled
                               placeholder="Введите телефон"
-                              :value="reservation.phone">
+                              :value="isAdmin?reservation.phone:user.phone">
                 </b-form-input>
               </b-form-group>
           </div>
@@ -69,24 +72,35 @@
               Пометить оплаченым
             </b-btn>
 
-            <b-btn class="my-1" type="submit" variant="danger" v-b-modal.ackModal>Удалить запись</b-btn>
+            <b-btn class="my-1" variant="danger" v-b-modal.ackModal>Удалить запись</b-btn>
           </div>
           <!-- users action buttons -->
           <div v-else class="mt-3 d-flex flex-column">
-            <b-btn v-if="game.payment.type === 'prepay' && reservation.type !== 'paid'" class="my-1" type="submit" variant="success">Оплатить</b-btn>
-            <b-btn class="my-1" type="submit" variant="primary">Изменить имя</b-btn>
-            <b-btn v-if="reservation.type !== 'paid'" class="my-1" type="submit" variant="danger" v-b-modal.ackModal>Отказаться от записи</b-btn>
+            <b-btn v-if="game.payment.type === 'prepay' && reservation.type !== 'paid'" class="my-1" type="submit" variant="success">
+              Оплатить
+            </b-btn>
+            <b-btn v-if="game.payment.type === 'manualPay' && reservation.type !== 'paid'" class="my-1" type="submit" variant="success">
+              Сообщить об оплате
+            </b-btn>
+
+            <b-btn class="my-1" type="submit" variant="primary">
+              Изменить имя
+            </b-btn>
+            <b-btn v-if="reservation.type !== 'paid'" class="my-1" variant="danger" v-b-modal.ackModal>
+                Отказаться от записи
+            </b-btn>
           </div>
 
           <!-- delete confirmation window -->
           <div>
-            <b-modal id="ackModal" title="Подтверждение" ok-variant="danger" ok-title="Да" cancel-title="Отмена">
+            <b-modal id="ackModal" title="Подтверждение" ok-variant="danger" ok-title="Да" cancel-title="Отмена"
+              @ok="handleDeleteOk">
               <p class="my-4">Удалить запись?</p>
             </b-modal>
           </div>
 
         </b-form>
-      </b-card-body>
+      </div>
 
     </div>
   </div>
@@ -142,9 +156,13 @@ export default {
         }
       })
     },
-    onPaySubmit: function () {
-
+    onPaySubmit: function (evt) {
+      console.log('change', evt)
+      evt.preventDefault()
     },
+    handleDeleteOk: function () {
+      console.log('delete')
+    }
   },
 }
 </script>

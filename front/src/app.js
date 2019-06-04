@@ -152,6 +152,18 @@ function setGameOrganizer(id, game) {
 	}
 }
 
+let lastDate = Date.now();
+const EXPIRECHECKINTERVAL = 2000;
+
+function checkDateExpire() {
+	if (Date.now() - lastDate > 5*60*1000) {
+		console.log('reload by time');
+		lastDate = Date.now();
+		updatePlayersList();
+	}
+	setTimeout(checkDateExpire, EXPIRECHECKINTERVAL);
+}
+
 window.onload = () => {
 	console.log('OK');
 
@@ -173,6 +185,8 @@ window.onload = () => {
 	} else {
 		updatePlayersList();
 	}
+
+	setTimeout(checkDateExpire, EXPIRECHECKINTERVAL);
 
 	// Slot click
 	$('.btn-player').on('click', el => {

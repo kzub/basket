@@ -3,6 +3,9 @@ const bodyParser = require('body-parser');
 const bot = require('./telegram_bot');
 const utils = require('./utils');
 const config = utils.getConfig();
+const apiBook = require('./api2/book');
+const apiGames = require('./api2/games');
+const apiUser = require('./api2/user');
 // const smtpEvents = require('./smtp_server');
 
 const app = express();
@@ -14,6 +17,12 @@ const engines = {
   basketmsk: require('./engine.basketmsk'),
   sqlite: require('./engine.sqlite')
 };
+
+// v2 api
+app.post('/api/v2/book', apiBook);
+app.get('/api/v2/games', apiGames);
+app.get('/api/v2/user', apiUser);
+// ------------------------
 
 app.get('/', function (req, res) {
   res.status(404).send('Not Found\n');

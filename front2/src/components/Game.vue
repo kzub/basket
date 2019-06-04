@@ -1,12 +1,27 @@
 <template>
   <div>
+    <div v-if="!(mxReturnInfo && mxGameInfo(mxReturnInfo.gameId))" class="my-2">
+      <div class="d-flex justify-content-center">
+        <div class="spinner-border" role="status">
+          <span class="sr-only">Loading...</span>
+        </div>
+      </div>
+    </div>
+
+    <b-btn class="btn-lg mb-3 rounded-0" block @click="back" variant="warning">
+      Назад
+    </b-btn>
+
     <div v-if="!mxAvailableSlots(game.slots)" class="card-title btn-danger rounded mt-2 mb-3 py-2">
       Свободных мест нет
     </div>
 
-    <div v-if="isAdmin" class="m-1 p-2 rounded btn-danger">
+    <div v-if="isAdmin" class="m-1 p-2 rounded adminMode">
       Режим администратора
     </div>
+    <!-- <div v-if="game.payment.type === 'manualBook'" class="m-1 p-2 rounded manualBookMode">
+      Предварительная запись
+    </div> -->
 
     <div>
       <div class="text-left m-2">Список игроков:</div>
@@ -43,21 +58,7 @@
       
       <hr/>
       
-      <div no-body class="mb-2 text-left pl-2">
-        <Organizer :name="game.organizer.name" :phone="game.organizer.phone" />
-
-        <div v-if="game.payment.type == 'prepay'">
-          Стоимость: {{ game.payment.amount }} р.
-        </div>
-        <div v-else-if="game.payment.type == 'preorder'">
-          Стоимость зала: {{ game.payment.amount }} р. <br>
-          Делится на всех <span class="font-weight-bolder font-italic text-danger">до</span> игры
-        </div>
-        <div v-else-if="game.payment.type == 'postpay'">
-          Стоимость зала: {{ game.payment.amount }} р. <br>
-          Делится на всех <span class="font-weight-bolder font-italic text-danger">после</span> игры
-        </div>      
-      </div>
+      <GameInfo :game="game" :short="true"/>
 
       <div class="mt-4 mb-5">
         <b-btn v-b-toggle="'collapsePlace' + game.gameId" variant="outline-primary">
@@ -81,13 +82,14 @@
 
 import GameUtils from '../mixins/game.js'
 import Organizer from './Organizer.vue'
+import GameInfo from './GameInfo.vue'
 
 export default {
   name: 'Game',
-  props: ['game'],
   mixins: [GameUtils],
   components: {
     Organizer,
+    GameInfo,
   },
   data: function() {
     return  {
@@ -102,18 +104,27 @@ export default {
   },
   computed: {
     isAdmin () {
-      return this.$store.state.user.userId === this.game.organizer.userId
+      return this.$store.state.user && 
+        this.$store.state.user.userId === this.game.organizer.userId
     },
     user () {
       return this.$store.state.user
     },
+    game: function() {
+      return this.mxGameInfo(this.mxReturnInfo.gameId)
+    },
   },
   methods: {
+    back: function() {
+      this.$router.push({
+        path: '/',
+      })
+    },
     modifyAllowed (game, slot) {
       if (slot.type.indexOf('empty') == 0) {
         return false
       }
-      return (this.user.userId == slot.userId) || this.isAdmin
+      return (this.user && this.user.userId == slot.userId) || this.isAdmin
     },
     isBackupPlayer (slot) {
       return ['waitlist', 'empty-backup'].includes(slot.type)
@@ -126,14 +137,14 @@ export default {
         if (this.$store.state.user && this.$store.state.user.auth) {
           return {
             // book slot
-            path: '/pay',
+            path: '/book',
             query: { gameId: game.gameId, slotType: slot.type }
           }
         }
         return {
           // redirect to auth page
           path: '/profile',
-          query: { retUrl: '/pay', gameId: game.gameId, slotType: slot.type }
+          query: { retUrl: '/book', gameId: game.gameId, slotType: slot.type }
         }
       }
 
@@ -189,6 +200,16 @@ i {
 .right {
   transform: rotate(-45deg);
   -webkit-transform: rotate(-45deg);
+}
+
+.adminMode{
+  border: 1px solid #dc3545;
+  color: #dc3545;
+}
+
+.manualBookMode {
+  border: 1px solid #557aa2;
+  color: #557aa2;
 }
 
 </style>

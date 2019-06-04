@@ -15,15 +15,17 @@ import VueRouter from 'vue-router'
 import Main from './components/Main.vue'
 import Admin from './components/Admin.vue'
 import Profile from './components/Profile.vue'
-import Pay from './components/Pay.vue'
+import Book from './components/Book.vue'
 import Reservation from './components/Reservation.vue'
+import Game from './components/Game.vue'
 
 const router = new VueRouter({
   routes :[
     { path: '/', component: Main },
     { path: '/admin', component: Admin },
     { path: '/profile', component: Profile },
-    { path: '/pay', name:'pay', component: Pay },
+    { path: '/game', name:'game', component: Game },
+    { path: '/book', name:'book', component: Book },
     { path: '/reservation', name:'reservation', component: Reservation },
   ],
 })
@@ -34,7 +36,7 @@ export default {
     Main,
     Admin,
     Profile,
-    Pay,
+    Book,
   },
   router,
 }

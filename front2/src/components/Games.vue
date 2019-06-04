@@ -4,21 +4,24 @@
     <div v-for="game in games" :key="game.gameId">
       <b-card no-body class="my-3 w-100">
         <b-card-header header-tag="header" class="p-0" role="tab">
-          <b-btn :class="userRole(game)" block href="#" variant="primary"
-          v-b-toggle="'gameAccordion' + game.gameId" @touchstart="gameClick(game.gameId)">
+          <b-btn :class="gameBorderColor(game)" block variant="primary" @touchstart="gameClick(game.gameId)">
             <div class="d-flex flex-row  justify-content-between py-1">
               <div class="d-flex flex-column justify-content-start align-items-start">
                 <div>
                   {{mxDateWeekDay(game.date)}}, {{mxDateDayAndMonth(game.date)}}
                 </div>
                 <div>
-                  {{game.timeFrom}} - {{game.timeTo}}              
+                  {{game.timeFrom}} - {{game.timeTo}}
+                </div>
+                <div>
+                  {{gameType(game)}}
                 </div>
               </div>
               <div class="d-flex flex-column align-items-end">
-                <div class="badge px-2 my-1" 
-                :class="mxAvailableSlots(game.slots) == 0 ? 'badge-danger' : 'badge-light'">
-                  {{mxAvailableSlots(game.slots)}}
+                <div>
+                  <div class="badge px-2 my-1" :class="mxAvailableSlots(game.slots) == 0 ? 'badge-danger' : 'badge-light'">
+                    {{mxAvailableSlots(game.slots)}}
+                  </div>
                 </div>
                 <div class="badge px-2 my-1 badge-light w-100">
                   {{ game.place.title }}
@@ -27,12 +30,6 @@
             </div>
           </b-btn>
         </b-card-header>
-        
-        <b-collapse :id="'gameAccordion' + game.gameId" :visible="isExpanded(game.gameId)"  accordion="game-acc" role="tabpanel">
-          <b-card-body class="p-2">
-            <Game :game="game"/>
-          </b-card-body>
-        </b-collapse>
       </b-card>
     </div>
 
@@ -52,10 +49,24 @@ export default {
   computed: {
   },
   methods: {
-    userRole: function (game) {
-      if (this.$store.state.user && this.$store.state.user.userId === game.organizer.userId) {
-        return 'admin'
+    gameType: function (game) {
+      if (game.status === 'poll') {
+        return 'Предварительная запись'
       }
+      return 'Игра запланирована'
+    },
+    gameBorderColor: function (game) {
+      let mode = '';
+      if (game.payment.type === 'manualBook') {
+        mode += ' manualBookMode'
+      }
+      else if (game.payment.type === 'manualPay') {
+        mode += ' manualPayMode'
+      }
+      if (this.$store.state.user && this.$store.state.user.userId === game.organizer.userId) {
+        mode += ' userIsAdmin'
+      }
+      return mode
     },
     isExpanded: function (gameId) {
       if (this.mxReturnInfo.gameId) {
@@ -64,7 +75,10 @@ export default {
       return this.games.length == 1;
     },
     gameClick: function (gameId) {
-      this.$router.push({ query: { gameId: gameId } })
+      this.$router.push({ 
+        path: '/game',
+        query: { gameId: gameId } 
+      })
     },
   },
   components: {
@@ -76,7 +90,16 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-.admin {
-  border-left: 5px solid red;
+.userIsAdmin {
+  /*border: 2px dotted #dc3545;*/
+  border-left: 10px solid #dc3545;
+}
+.manualBookMode {
+  /*border-left: 5px solid #dc3545;*/
+  background-color: #557aa2;
+  border-color: #557aa2;
+}
+.manualPayMode {
+  /*border-left: 5px solid #17a2b8;*/
 }
 </style>

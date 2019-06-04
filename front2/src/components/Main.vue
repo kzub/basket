@@ -5,7 +5,7 @@
     <Games :games="games"/>
 
     <b-btn class="btn-lg mt-4 rounded-0" block 
-    href="tg://join?invite=CE3oJA6vM82vZHQXf03yyA" variant="warning">
+    href="tg://resolve?domain=playbasket" variant="outline-secondary">
       Наш чат в телеграм
     </b-btn>
   </div>
